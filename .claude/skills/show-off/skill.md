@@ -22,15 +22,23 @@ the git history, understands the code, builds an ASCII diagram, and posts it.
 
 ### Step 1: Analyze What They Built
 
-Do NOT ask the student to explain anything. Figure it out yourself:
+Do NOT ask the student to explain anything. Figure it out yourself.
 
+**Try git first:**
 1. **Run `git log --oneline -20`** to see recent commits
 2. **Run `git diff --stat HEAD~10`** (or since their first commit) to see what files changed
 3. **Read the key files** — new agents, skills, helpers, configs, analysis outputs
-4. **Understand the architecture** — what components exist, how they connect, what data flows where
 
-Build a mental model of what they created: agents, skills, pipelines, data sources,
-outputs, and how they all fit together.
+**If there are no commits** (student hasn't committed yet, or code has changed but
+nothing's been staged), fall back to scanning the workspace:
+1. **Run `git status`** to see modified and untracked files
+2. **Run `git diff`** to see unstaged changes
+3. **List key directories** — `agents/`, `skills/`, `helpers/`, `analysis/`, any output dirs
+4. **Read new or modified files** to understand what they contain
+
+**Understand the architecture** — what components exist, how they connect, what data
+flows where. Build a mental model of what they created: agents, skills, pipelines,
+data sources, outputs, and how they all fit together.
 
 ### Step 2: Build the ASCII Diagram
 
@@ -121,6 +129,6 @@ After posting, say something like:
 2. The student should NOT have to explain what they built — Claude figures it out
 3. The ASCII diagram is the star of the post — make it clean and impressive
 4. Keep the intro line short — one sentence max
-5. If there's not enough in the git history to work with, ask what they've been working on as a fallback
+5. Works with or without git commits — use `git status` and `git diff` for uncommitted work
 6. No limit on show-offs — encourage it every time they build something new
 7. If they haven't run `/kickoff` yet, nudge them to do that first
