@@ -1,12 +1,13 @@
 # Skill: Show Off
 
 ## Purpose
-Share what you've built with the AI Analyst Lab community on Slack. Posts a
-short, proud showcase message to `#show-and-tell` from the student's own account.
+Automatically analyze what the student has built and share a visual showcase
+to the AI Analyst Lab community on Slack. Claude does all the work — reads
+the git history, understands the code, builds an ASCII diagram, and posts it.
 
 ## When to Use
 - User says `/show-off` or "share what I built" or "show the community"
-- After completing an analysis, pipeline run, or building something cool
+- After completing an analysis, pipeline, or building something cool
 
 ## Invocation
 `/show-off` — share what you've built with the community
@@ -19,43 +20,86 @@ short, proud showcase message to `#show-and-tell` from the student's own account
 
 ## Instructions
 
-### Step 1: Figure Out What They Built
+### Step 1: Analyze What They Built
 
-Ask: **"What did you just build or figure out? Give me the quick version."**
+Do NOT ask the student to explain anything. Figure it out yourself:
 
-Let them describe it in their own words. If they're vague, ask one follow-up like:
-- "What was the question you were trying to answer?"
-- "What data did you use?"
-- "What surprised you about the result?"
+1. **Run `git log --oneline -20`** to see recent commits
+2. **Run `git diff --stat HEAD~10`** (or since their first commit) to see what files changed
+3. **Read the key files** — new agents, skills, helpers, configs, analysis outputs
+4. **Understand the architecture** — what components exist, how they connect, what data flows where
 
-### Step 2: Check for Artifacts
+Build a mental model of what they created: agents, skills, pipelines, data sources,
+outputs, and how they all fit together.
 
-Look in the current working directory for recent outputs that would make the post
-more concrete. Check for:
-- Charts or visualizations (PNG, SVG)
-- Analysis summaries
-- Pipeline outputs
-- Interesting data findings
+### Step 2: Build the ASCII Diagram
 
-If you find something good, mention it: **"I see you generated [artifact]. Want me to mention that in the post?"**
+Create an ASCII art diagram that visualizes what they built. This should show
+the architecture, data flow, or pipeline they created.
 
-### Step 3: Compose the Message
+Guidelines:
+- Use box-drawing characters for clean boxes: `┌ ┐ └ ┘ │ ─ ├ ┤ ┬ ┴ ┼`
+- Use arrows for data flow: `→ ← ↓ ↑` or `-->` for connections
+- Label everything clearly
+- Keep it compact but readable in Slack (monospace font)
+- Show the interesting parts — don't just list files
 
-Write a short showcase post (2-4 sentences) that:
-- Leads with what they built or discovered (not "I just used AI to...")
-- Includes a specific detail that makes it real (a number, a finding, a dataset)
-- Shows genuine excitement without being over-the-top
-- Ends with an invitation or energy
+**Example styles** (for reference, adapt to what they actually built):
 
-**Example outputs** (for tone, don't copy verbatim):
-- "Just built a full funnel analysis for NovaMart's checkout flow — turns out 34% of users drop off at the shipping step. The AI Analyst found the pattern in about 10 seconds. Wild. Anyone else finding checkout insights? 📊"
-- "Ran my first end-to-end pipeline! Asked 'which product categories are growing fastest?' and got back a full breakdown with charts. Took maybe 2 minutes total. This is going to change how I do weekly reporting. 🔥"
-- "My AI Analyst just caught something I've been missing for months — our mobile conversion rate is half of desktop, but only on weekends. Already thinking about what to test. 💡"
+```
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│  Question   │───→│  SQL Agent   │───→│   Charts    │
+│  "Why are   │    │  queries     │    │   3 viz     │
+│  sales down"│    │  NovaMart DB │    │   generated │
+└─────────────┘    └──────────────┘    └──────┬──────┘
+                                              │
+                                              ▼
+                                       ┌─────────────┐
+                                       │  Narrative   │
+                                       │  "Weekend    │
+                                       │  drop-off    │
+                                       │  in mobile"  │
+                                       └─────────────┘
+```
+
+```
+    🏗️ My AI Analyst
+
+    User Question
+         │
+         ▼
+    ┌─────────┐   ┌──────────┐   ┌────────────┐
+    │ Planner │──→│ Analyst  │──→│ Visualizer │
+    └─────────┘   └──────────┘   └────────────┘
+         │              │              │
+         ▼              ▼              ▼
+    plan.md        analysis.md    charts/*.png
+                                       │
+                                       ▼
+                                ┌────────────┐
+                                │ Storyteller │──→ report.md
+                                └────────────┘
+```
+
+### Step 3: Compose the Post
+
+Combine a one-line intro + the ASCII diagram into a Slack message. Format:
+
+```
+[One-line description of what they built] [emoji]
+
+[ASCII diagram in a code block]
+```
+
+The one-line intro should be specific to what they built. Examples:
+- "Built a 4-agent pipeline that goes from question to charts to narrative 🔥"
+- "My AI Analyst just analyzed 50K rows of checkout data and found the weekend drop-off 📊"
+- "First full pipeline run — question in, report out, 3 agents, zero SQL written by hand 🚀"
 
 ### Step 4: Confirm Before Posting
 
-Show the student the message and ask:
-**"Here's your post for #show-and-tell. Want me to send it, or change anything?"**
+Show the student the full message and ask:
+**"Here's your showcase for #show-and-tell. Want me to send it, or change anything?"**
 
 Do NOT post until they confirm.
 
@@ -65,6 +109,8 @@ Post the message to the `#show-and-tell` channel using the Slack MCP.
 
 Use the channel name `show-and-tell` when calling the Slack MCP send message tool.
 
+Wrap the ASCII diagram in triple backticks so Slack renders it in monospace.
+
 ### Step 6: Celebrate
 
 After posting, say something like:
@@ -72,8 +118,9 @@ After posting, say something like:
 
 ## Rules
 1. Always confirm before posting — never auto-send
-2. Keep the message short — 2-4 sentences max
-3. Lead with the WHAT, not the tool — "I found X" not "I used AI to find X"
-4. If the student wants to write their own message, let them
-5. No limit on how many times they can show off — encourage it
-6. If they haven't run `/kickoff` yet, nudge them to do that first
+2. The student should NOT have to explain what they built — Claude figures it out
+3. The ASCII diagram is the star of the post — make it clean and impressive
+4. Keep the intro line short — one sentence max
+5. If there's not enough in the git history to work with, ask what they've been working on as a fallback
+6. No limit on show-offs — encourage it every time they build something new
+7. If they haven't run `/kickoff` yet, nudge them to do that first
