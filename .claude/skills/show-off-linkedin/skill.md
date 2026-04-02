@@ -188,48 +188,42 @@ so you can post it, or change anything first?"**
 
 Do NOT proceed until they confirm.
 
-### Step 7: Open LinkedIn with Caption Pre-filled
+### Step 7: Open LinkedIn with Caption Pre-filled + Image on Clipboard
 
-LinkedIn supports pre-filling the compose box via URL parameters. Use this
-exact format (same pattern as the evals course certificate share):
+Two things happen simultaneously:
 
-```
-https://www.linkedin.com/feed/?shareActive=true&text=ENCODED_CAPTION
-```
-
-The caption must be URL-encoded. In bash:
-
-```bash
-# URL-encode the caption and open LinkedIn with it pre-filled
-CAPTION="The caption text here"
-ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$CAPTION'''))")
-open "https://www.linkedin.com/feed/?shareActive=true&text=${ENCODED}"
-
-# Also open the PNG in Finder so they can drag it in
-open showcase.png
-```
-
-Or more reliably, use Python to handle the encoding and open:
+1. **Caption goes in the URL** — LinkedIn's `shareActive` parameter pre-fills the compose box
+2. **Image goes on the clipboard** — macOS `osascript` copies the PNG so the student can Cmd+V
 
 ```bash
 python3 -c "
-import urllib.parse, subprocess, webbrowser
+import urllib.parse, subprocess, webbrowser, os
+
 caption = '''CAPTION_TEXT_HERE'''
+
+# Copy the PNG to clipboard (macOS)
+png_path = os.path.abspath('showcase.png')
+subprocess.run(['osascript', '-e', 'set the clipboard to (read (POSIX file \"' + png_path + '\") as «class PNGf»)'])
+
+# Open LinkedIn with caption pre-filled
 url = 'https://www.linkedin.com/feed/?shareActive=true&text=' + urllib.parse.quote(caption)
 webbrowser.open(url)
-subprocess.run(['open', 'showcase.png'])
 "
 ```
 
 LinkedIn opens with the compose box active and the caption already typed in.
-The PNG opens in Finder/Preview right next to it.
+The showcase PNG is on the clipboard ready to paste.
 
 Then tell the student:
 
-**"LinkedIn is open with your caption already filled in. Just drag the image
-from the window behind it into the post, and hit Post!"**
+**"LinkedIn is open with your caption already filled in and your image
+copied to your clipboard. Just hit Cmd+V to paste the image, then Post!"**
 
-That's it — one drag, one click.
+One paste, one click.
+
+**Fallback:** If pasting the image doesn't work in LinkedIn's composer (some
+browsers handle clipboard images differently), tell the student to click the
+image icon in the composer and select `showcase.png` from their project folder.
 
 ### Step 8: Clean up
 
