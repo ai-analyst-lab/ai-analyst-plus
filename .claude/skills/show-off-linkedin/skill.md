@@ -188,30 +188,48 @@ so you can post it, or change anything first?"**
 
 Do NOT proceed until they confirm.
 
-### Step 7: Open LinkedIn and Prepare the Post
+### Step 7: Open LinkedIn with Caption Pre-filled
 
-After confirmation, do all three of these:
+LinkedIn supports pre-filling the compose box via URL parameters. Use this
+exact format (same pattern as the evals course certificate share):
+
+```
+https://www.linkedin.com/feed/?shareActive=true&text=ENCODED_CAPTION
+```
+
+The caption must be URL-encoded. In bash:
 
 ```bash
-# Copy the caption to clipboard
-echo "CAPTION_TEXT_HERE" | pbcopy
+# URL-encode the caption and open LinkedIn with it pre-filled
+CAPTION="The caption text here"
+ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$CAPTION'''))")
+open "https://www.linkedin.com/feed/?shareActive=true&text=${ENCODED}"
 
-# Open the PNG so they can drag it
+# Also open the PNG in Finder so they can drag it in
 open showcase.png
-
-# Open LinkedIn
-open "https://www.linkedin.com/feed/"
 ```
+
+Or more reliably, use Python to handle the encoding and open:
+
+```bash
+python3 -c "
+import urllib.parse, subprocess, webbrowser
+caption = '''CAPTION_TEXT_HERE'''
+url = 'https://www.linkedin.com/feed/?shareActive=true&text=' + urllib.parse.quote(caption)
+webbrowser.open(url)
+subprocess.run(['open', 'showcase.png'])
+"
+```
+
+LinkedIn opens with the compose box active and the caption already typed in.
+The PNG opens in Finder/Preview right next to it.
 
 Then tell the student:
 
-**"LinkedIn is open and your caption is copied to your clipboard. Here's what to do:"**
+**"LinkedIn is open with your caption already filled in. Just drag the image
+from the window behind it into the post, and hit Post!"**
 
-1. **Click "Start a post"** on LinkedIn
-2. **Click the image icon** (📷) in the post composer
-3. **Drag `showcase.png`** from the Finder window into LinkedIn (or click to browse and select it)
-4. **Paste** (Cmd+V) — your caption is already on the clipboard
-5. **Hit Post!**
+That's it — one drag, one click.
 
 ### Step 8: Clean up
 
