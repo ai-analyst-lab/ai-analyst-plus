@@ -6,8 +6,9 @@ student built — designed for posting on LinkedIn. Claude analyzes the student'
 code, understands their architecture, and generates a custom 1080x1080 visual
 in the AI Analyst Lab brand style.
 
-The student does nothing except type `/show-off-linkedin` and screenshot the
-result. Claude handles everything else.
+The student does nothing except type `/show-off-linkedin`, confirm the post,
+and hit Post on LinkedIn. Claude handles everything else — renders the image,
+drafts the caption, opens LinkedIn, and copies the caption to clipboard.
 
 ## When to Use
 - User says `/show-off-linkedin` or "LinkedIn showcase" or "share on LinkedIn"
@@ -132,37 +133,96 @@ in the `<div class="content">` section for this specific student's build.
 6. **Keep it tight but breathable.** Everything must fit in 1080x1080 without scrolling. But don't cram — whitespace makes it professional.
 7. **Count things for the stats row.** Agents, charts, tests, lines of code — concrete numbers make it impressive.
 
-### Step 4: Save and Open
+### Step 4: Render to PNG
 
-Save the HTML file to the repo root:
-
-```
-showcase.html
-```
-
-Then open it in the browser:
+Save the HTML file to the repo root as `showcase.html`, then render it to
+a crisp PNG using the render script:
 
 ```bash
-open showcase.html
+node scripts/render-showcase.mjs showcase.html showcase.png
 ```
 
-### Step 5: Tell the Student
+This produces a 2160x2160 retina PNG (2x scale of 1080x1080) — perfect for
+LinkedIn's image quality. The first run installs puppeteer and downloads
+Chromium (~280MB), subsequent runs are instant.
 
-Say something like:
+If the render script fails (missing Node.js, Chromium issues), fall back to
+opening the HTML in the browser and telling the student to screenshot manually.
 
-**"Your LinkedIn showcase is open in your browser. Screenshot it and post it! Here's a caption suggestion:"**
+### Step 5: Draft the LinkedIn Caption
 
-Then draft a short LinkedIn caption (2-3 sentences, first person) that goes
-with the image. Something like:
+Write a short LinkedIn post (3-5 sentences, first person) that:
+- Opens with what they built today — specific, not vague
+- Mentions it was at the **AI Analyst Lab** bootcamp
+- Names concrete details (number of agents, what data they analyzed, what they found)
+- Conveys genuine excitement without being cringe
+- Ends with a takeaway or reflection
+- Does NOT use hashtags, emojis, or "day 1/30" style formatting
 
-> Built this in a day at the AI Analyst Lab bootcamp. An AI-powered analysis
-> engine that goes from business question to experiment design + 18 charts,
-> fully organized. Wild what's possible with Claude Code + good architecture.
+**Example captions** (for tone, don't copy):
 
-### Step 6: Clean up
+> Built an AI-powered analysis engine today at the AI Analyst Lab bootcamp.
+> It takes a business question, queries real data with DuckDB, runs power
+> analysis with scipy, and outputs 18 production-quality charts. The whole
+> thing is orchestrated by Claude Code — I wrote the architecture, Claude
+> wrote the code. Took about 4 hours.
 
-The `showcase.html` file is for screenshot purposes only — remind the student
-they can delete it after screenshotting. Don't commit it.
+> Spent the day at AI Analyst Lab building a checkout funnel analyzer.
+> Asked it "should we redesign mobile checkout?" and it came back with a
+> full experiment design, sample size calculations, and 14 visualizations.
+> I'm a PM. I've never written a line of Python. This is wild.
+
+> Just built my first agentic analysis pipeline. Three AI agents that
+> coordinate to go from question to insight to report — with actual
+> statistical rigor, not just vibes. Built at the AI Analyst Lab bootcamp
+> with Claude Code. Already thinking about how to use this at work.
+
+### Step 6: Confirm Before Posting
+
+Show the student:
+1. The rendered PNG (open it: `open showcase.png`)
+2. The LinkedIn caption
+
+Ask: **"Here's your LinkedIn showcase and caption. Want me to open LinkedIn
+so you can post it, or change anything first?"**
+
+Do NOT proceed until they confirm.
+
+### Step 7: Open LinkedIn and Prepare the Post
+
+After confirmation, do all three of these:
+
+```bash
+# Copy the caption to clipboard
+echo "CAPTION_TEXT_HERE" | pbcopy
+
+# Open the PNG so they can drag it
+open showcase.png
+
+# Open LinkedIn
+open "https://www.linkedin.com/feed/"
+```
+
+Then tell the student:
+
+**"LinkedIn is open and your caption is copied to your clipboard. Here's what to do:"**
+
+1. **Click "Start a post"** on LinkedIn
+2. **Click the image icon** (📷) in the post composer
+3. **Drag `showcase.png`** from the Finder window into LinkedIn (or click to browse and select it)
+4. **Paste** (Cmd+V) — your caption is already on the clipboard
+5. **Hit Post!**
+
+### Step 8: Clean up
+
+After they've posted (or decided not to), the `showcase.html` and
+`showcase.png` files can be deleted — they're not part of the project:
+
+```bash
+rm -f showcase.html showcase.png
+```
+
+Don't auto-delete — ask first or just mention they can clean up.
 
 ## Rules
 1. The student should NOT have to explain what they built — Claude figures it out
