@@ -146,6 +146,12 @@ This produces a 2160x2160 retina PNG (2x scale of 1080x1080) — perfect for
 LinkedIn's image quality. The first run installs puppeteer and downloads
 Chromium (~280MB), subsequent runs are instant.
 
+Also copy the PNG to the student's Desktop so they can find it easily:
+
+```bash
+cp showcase.png ~/Desktop/showcase.png
+```
+
 If the render script fails (missing Node.js, Chromium issues), fall back to
 opening the HTML in the browser and telling the student to screenshot manually.
 
