@@ -403,3 +403,177 @@ agents:
     outputs:
       - working/comms_draft.md
     knowledge_context: []
+
+  - name: confound-scanner
+    file: agents/confound-scanner.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - hypothesis-sharpener
+    inputs:
+      - HYPOTHESIS
+      - ANALYSIS_BRIEF
+      - DATA_CONTEXT
+      - TIME_PERIOD
+    outputs:
+      - working/confound_scan_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/schema.md
+      - .knowledge/datasets/{active}/quirks.md
+
+  - name: experiment-analyzer
+    file: agents/experiment-analyzer.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - experiment-designer
+    inputs:
+      - EXPERIMENT_DATA
+      - PRIMARY_METRIC
+      - GUARDRAIL_METRICS
+      - TREATMENT_COLUMN
+      - SEGMENT_COLUMNS
+    outputs:
+      - working/experiment_analysis_{{DATASET_NAME}}_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/schema.md
+      - .knowledge/datasets/{active}/quirks.md
+
+  - name: experiment-readout
+    file: agents/experiment-readout.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - experiment-analyzer
+    inputs:
+      - ANALYSIS_RESULTS
+      - AUDIENCE
+      - CONTEXT
+    outputs:
+      - outputs/experiment_readout_{{DATASET_NAME}}_{{DATE}}.md
+      - outputs/experiment_readout_{{DATASET_NAME}}_{{DATE}}.marp.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/schema.md
+
+  - name: feedback-synthesizer
+    file: agents/feedback-synthesizer.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - hypothesis-sharpener
+    inputs:
+      - V1_FINDINGS
+      - FEEDBACK
+      - ORIGINAL_HYPOTHESIS
+      - AUDIENCE
+    outputs:
+      - working/v2_plan_{{DATE}}.md
+    knowledge_context: []
+
+  - name: google-doc-creator
+    file: agents/google-doc-creator.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - storytelling
+      - chart-maker
+    inputs:
+      - NARRATIVE
+      - CHART_FILES
+      - DOC_TITLE
+      - DATASET
+    outputs:
+      - outputs/doc_url_{{DATASET}}_{{DATE}}.txt
+      - working/doc_review_{{DATASET}}_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/manifest.yaml
+
+  - name: google-doc-reviewer
+    file: agents/google-doc-reviewer.md
+    pipeline_step: null
+    critical: false
+    depends_on: []
+    inputs:
+      - DOCUMENT_ID
+      - DOC_TITLE
+      - DATASET
+    outputs:
+      - working/doc_review_{{DATASET}}_{{DATE}}.md
+    knowledge_context: []
+
+  - name: google-slides-creator
+    file: agents/google-slides-creator.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - storytelling
+      - story-architect
+    inputs:
+      - NARRATIVE
+      - STORYBOARD
+      - DECK_TITLE
+      - THEME
+      - DATASET
+    outputs:
+      - outputs/slides_url_{{DATASET}}_{{DATE}}.txt
+      - working/slides_review_{{DATASET}}_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/manifest.yaml
+
+  - name: google-slides-reviewer
+    file: agents/google-slides-reviewer.md
+    pipeline_step: null
+    critical: false
+    depends_on:
+      - google-slides-creator
+    inputs:
+      - PRESENTATION_ID
+      - DECK_TITLE
+      - SLIDE_COUNT
+      - DATASET
+    outputs:
+      - working/slides_review_{{DATASET}}_{{DATE}}.md
+    knowledge_context: []
+
+  - name: hypothesis-sharpener
+    file: agents/hypothesis-sharpener.md
+    pipeline_step: null
+    critical: true
+    depends_on: []
+    inputs:
+      - HUNCH
+      - DATA_CONTEXT
+      - BUSINESS_CONTEXT
+    outputs:
+      - working/hypothesis_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/schema.md
+      - .knowledge/datasets/{active}/quirks.md
+
+  - name: presentation-doctor
+    file: agents/presentation-doctor.md
+    pipeline_step: null
+    critical: true
+    depends_on: []
+    inputs:
+      - DECK_SOURCE
+      - AUDIENCE
+      - CONTEXT
+      - THEME
+    outputs:
+      - working/presentation_doctor_{{DATE}}.md
+      - working/deck_rescue_{{DATE}}.marp.md
+    knowledge_context: []
+
+  - name: story-extractor
+    file: agents/story-extractor.md
+    pipeline_step: null
+    critical: true
+    depends_on: []
+    inputs:
+      - INPUT_SOURCE
+      - AUDIENCE
+      - CONTEXT
+    outputs:
+      - working/story_extraction_{{DATE}}.md
+    knowledge_context: []

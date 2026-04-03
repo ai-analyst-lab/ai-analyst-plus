@@ -106,6 +106,18 @@ condition matches -- you do not need to be asked.
 | Show Off | `.claude/skills/show-off/skill.md` | Invoked as `/show-off` — share what you built with the community on Slack |
 | Show Off LinkedIn | `.claude/skills/show-off-linkedin/skill.md` | Invoked as `/show-off-linkedin` — share what you built on LinkedIn with a showcase image |
 | Certificate | `.claude/skills/certificate/skill.md` | Invoked as `/certificate` — generate a completion certificate and prepend to your slide deck |
+| Google Slides Export | `.claude/skills/google-slides-export/skill.md` | Building any Google Slides presentation via MCP API — design system, layout library, pre-flight checklist |
+| Google Doc Export | `.claude/skills/google-doc-export/skill.md` | Building any Google Doc via MCP API — document structure, image placement rules, formatting standards |
+| Chart-to-Drive Uploader | `.claude/skills/chart-to-drive/skill.md` | Uploading chart PNGs to Google Drive for use in Docs/Slides — tmpfiles intermediary, Drive save, permissions |
+| Auth Preflight | `.claude/skills/auth-preflight/skill.md` | Session start when Google APIs needed — verify credentials, test token, handle re-auth |
+| Session Handoff | `.claude/skills/session-handoff/skill.md` | Approaching context limits — save resource IDs, pipeline progress, auth state to working/session_state.yaml |
+| Experiment Brief | `.claude/skills/experiment-brief/skill.md` | User expresses intent to test something ("I want to test...", "Should we A/B test...") — auto-generates structured brief before Experiment Designer runs |
+| SRM Check | `.claude/skills/srm-check/skill.md` | Loading any experiment/A/B test dataset — auto-fires to validate randomization integrity before analysis proceeds |
+| Deck Critique | `.claude/skills/deck-critique/skill.md` | Invoked as `/deck-critique` — score any deck slide-by-slide against the Data Story Checklist (SO-WHAT, STAKES, EVIDENCE, ASK). Returns diagnosis + grade + prescription. |
+| Slide Transform | `.claude/skills/slide-transform/skill.md` | Invoked as `/slide-transform` — take one bad slide and produce 2-3 redesigned variants (headline fix, declutter, story reframe) with before/after scoring. |
+| Deck Rescue | `.claude/skills/deck-rescue/skill.md` | Invoked as `/deck-rescue` — full deck rewrite pipeline: diagnose → extract story → rebuild narrative arc → new Marp deck + before/after comparison. |
+| Analysis Design | `.claude/skills/analysis-design/skill.md` | Invoked as `/analysis-design` — full lifecycle: hunch → testable hypothesis → confound scan → investigation plan → V1 → feedback synthesis → V2 redesign. Orchestrates 3 agents. |
+| Stress Test | `.claude/skills/stress-test/skill.md` | Invoked as `/stress-test` — standalone 7-point review of any analysis plan for methodological flaws (wrong baselines, survivorship bias, missing segments, confounds, no kill criteria). |
 
 **How skills work:** Read the skill file when triggered and follow its instructions. Multiple skills can apply at once (e.g., Visualization Patterns + Triangulation).
 
@@ -182,6 +194,10 @@ When asked to analyze data, follow this process:
     Creator auto-selects theme based on context: workshop/talk defaults to
     analytics-dark, all other contexts default to analytics (light). Pass
     {{THEME}} to override. (Use Deck Creator agent)
+16b. **Create Google Slides** (alternative to 16) -- If the user wants a live,
+    editable Google Slides deck instead of Marp PDF, use the Google Slides
+    Creator agent. Requires Google Workspace MCP connection. The Google Slides
+    Reviewer agent runs automatically after creation to fix formatting issues.
 17. **Review deck design** -- Check the Marp deck for font sizes, theme
     consistency, and dark mode rendering issues. Pass {{DECK_FILE}} and
     {{THEME}}. (Use Visual Design Critic agent -- slide-level review)
