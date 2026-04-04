@@ -102,18 +102,27 @@ cp certificate.png outputs/certificate.png
 ### Step 6: Render Full Deck to PDF
 
 Detect the theme from the deck's YAML frontmatter (`theme:` field), then
-render with Marp CLI. **The output PDF must be named
-`Certificate of Completion.pdf`** — this is what the user sees and shares.
+resolve the actual CSS file before rendering. Marp CLI cannot follow CSS
+`@import` chains in custom themes, so you must resolve to the real stylesheet.
+
+**Theme resolution:** Read `themes/DETECTED_THEME.css`. If the file only
+contains an `@import` (e.g., `@import 'analytics-light'`), follow the import
+and use the target file instead. Repeat until you reach a CSS file with actual
+style rules.
 
 ```bash
+# Example: frontmatter says theme: analytics
+# themes/analytics.css contains only: @import 'analytics-light';
+# → Resolve to themes/analytics-light.css (the real stylesheet)
+
 npx @marp-team/marp-cli --no-stdin --pdf --html --allow-local-files \
-  --theme themes/DETECTED_THEME.css \
+  --theme themes/RESOLVED_THEME.css \
   DECK_PATH \
   -o "Certificate of Completion.pdf"
 ```
 
 For example, if the deck is `outputs/deck_novamart_2026-04-01.marp.md` with
-`theme: analytics-light`:
+`theme: analytics` (which imports `analytics-light`):
 
 ```bash
 npx @marp-team/marp-cli --no-stdin --pdf --html --allow-local-files \
