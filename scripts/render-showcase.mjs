@@ -33,8 +33,8 @@ async function render() {
   const browser = await puppeteer.default.launch({ headless: 'new' });
   const page = await browser.newPage();
 
-  // 2x device scale for crisp retina output (renders 2160x2160, perfect for LinkedIn)
-  await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 2 });
+  // 2x device scale for crisp retina output
+  await page.setViewport({ width: 1080, height: 680, deviceScaleFactor: 2 });
 
   // Wait for fonts to load (Google Fonts)
   await page.goto(`file://${input}`, { waitUntil: 'networkidle0', timeout: 15000 });
@@ -42,11 +42,14 @@ async function render() {
   // Extra wait for font rendering
   await new Promise(r => setTimeout(r, 1000));
 
-  await page.screenshot({ path: output, type: 'png' });
+  // Clip to the .slide element so we capture exactly its dimensions
+  const slide = await page.$('.slide');
+  const box = await slide.boundingBox();
+  await page.screenshot({ path: output, type: 'png', clip: box });
   await browser.close();
 
   console.log(`\n  Showcase saved: ${output}`);
-  console.log(`  Dimensions: 2160x2160 (2x retina)\n`);
+  console.log(`  Dimensions: ${Math.round(box.width * 2)}x${Math.round(box.height * 2)} (2x retina)\n`);
 }
 
 render().catch(err => {
