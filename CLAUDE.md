@@ -106,6 +106,7 @@ condition matches -- you do not need to be asked.
 | Show Off | `.claude/skills/show-off/skill.md` | Invoked as `/show-off` — share what you built with the community on Slack |
 | Show Off LinkedIn | `.claude/skills/show-off-linkedin/skill.md` | Invoked as `/show-off-linkedin` — share what you built on LinkedIn with a showcase image |
 | Certificate | `.claude/skills/certificate/skill.md` | Invoked as `/certificate` — generate a completion certificate and prepend to your slide deck |
+| Demo | `.claude/skills/demo/skill.md` | Invoked as `/demo` — guided breakout room experience: 5-question interview to personalize, then 5-stage walkthrough (Frame, Analyze, Story, Deck, Share) with pause points |
 | Google Slides Export | `.claude/skills/google-slides-export/skill.md` | Building any Google Slides presentation via MCP API — design system, layout library, pre-flight checklist |
 | Google Doc Export | `.claude/skills/google-doc-export/skill.md` | Building any Google Doc via MCP API — document structure, image placement rules, formatting standards |
 | Chart-to-Drive Uploader | `.claude/skills/chart-to-drive/skill.md` | Uploading chart PNGs to Google Drive for use in Docs/Slides — tmpfiles intermediary, Drive save, permissions |
