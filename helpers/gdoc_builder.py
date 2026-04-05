@@ -213,7 +213,8 @@ def _style_run(run, font_name=_BODY_FONT, size=_BODY_SIZE,
 
 def _add_body_paragraph(doc, text: str, bold=False, italic=False,
                         alignment=None) -> None:
-    """Add a styled body paragraph, auto-bolding known label prefixes."""
+    """Add a styled body paragraph, rendering inline **bold** markdown
+    and auto-bolding known label prefixes."""
     p = doc.add_paragraph()
     if alignment:
         p.alignment = alignment
@@ -229,13 +230,34 @@ def _add_body_paragraph(doc, text: str, bold=False, italic=False,
     if label_found:
         run_label = p.add_run(label_found)
         _style_run(run_label, bold=True)
-        run_rest = p.add_run(text[len(label_found):])
-        _style_run(run_rest, italic=italic)
+        remaining = text[len(label_found):]
+        # Render remaining with inline **bold** support
+        _add_markdown_runs(p, remaining, italic=italic)
+    elif bold:
+        # Whole paragraph bold — still handle inline markdown
+        _add_markdown_runs(p, text, base_bold=True, italic=italic)
     else:
-        run = p.add_run(text)
-        _style_run(run, bold=bold, italic=italic)
+        # Render with inline **bold** support
+        _add_markdown_runs(p, text, italic=italic)
 
     return p
+
+
+def _add_markdown_runs(paragraph, text: str, base_bold=False,
+                        italic=False) -> None:
+    """Split text on **bold** markers and add runs with correct styling.
+
+    Handles `**text**` inline bold syntax from markdown.
+    """
+    import re
+    # Split on **...**  — parts alternate: plain, bold, plain, bold, ...
+    parts = re.split(r'\*\*(.+?)\*\*', text)
+    for idx, part in enumerate(parts):
+        if not part:
+            continue
+        is_bold_segment = (idx % 2 == 1)  # odd indices are inside **...**
+        run = paragraph.add_run(part)
+        _style_run(run, bold=(base_bold or is_bold_segment), italic=italic)
 
 
 def _add_heading(doc, text: str, level: int, bookmark_name: str = None):

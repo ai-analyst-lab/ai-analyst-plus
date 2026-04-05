@@ -90,20 +90,47 @@ def _parse_narrative_title(text: str) -> str:
 
 def _parse_context(text: str) -> Optional[str]:
     """Extract the Context section."""
-    return _extract_between(text, "Context", [
+    raw = _extract_between(text, "Context", [
         "Key Findings", "Findings", "Executive Summary",
     ])
+    return _strip_markdown(raw) if raw else None
 
 
 def _parse_executive_summary(text: str) -> Optional[str]:
     """Extract the Executive Summary section."""
-    return _extract_between(text, "Executive Summary", [
+    raw = _extract_between(text, "Executive Summary", [
         "Context", "Key Findings", "Findings",
     ])
+    return _strip_markdown(raw) if raw else None
+
+
+def _strip_markdown(text: str) -> str:
+    """Strip markdown formatting artifacts from text.
+
+    Removes:
+    - --- horizontal rules (standalone lines)
+    - Markdown table rows (lines starting with |)
+    - Leading/trailing whitespace
+    """
+    lines = []
+    for line in text.split("\n"):
+        stripped = line.strip()
+        # Skip horizontal rules
+        if re.match(r'^-{3,}\s*$', stripped):
+            continue
+        # Skip markdown table rows
+        if stripped.startswith("|") and "|" in stripped[1:]:
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
 
 
 def _parse_findings(text: str, charts_dir: str) -> list[Finding]:
-    """Parse ## Key Findings → ### Finding N sections."""
+    """Parse ## Key Findings → ### Finding N sections.
+
+    Handles structured narrative format with **Headline:**, **Detail:**,
+    **Impact:**, **Metrics:**, **Chart:**, **Source:** fields per finding.
+    """
     findings_text = _extract_between(text, "Key Findings", [
         "Insight", "Implication", "Recommendations", "Supporting Data",
     ])
@@ -119,46 +146,151 @@ def _parse_findings(text: str, charts_dir: str) -> list[Finding]:
     # parts[1] is first heading text, parts[2] is first body, etc.
     for i in range(1, len(parts), 2):
         headline = parts[i].strip()
-        body = parts[i + 1].strip() if i + 1 < len(parts) else ""
+        raw_body = parts[i + 1].strip() if i + 1 < len(parts) else ""
 
-        # Look for chart references in the body
-        chart_path = _find_chart_for_finding(body, charts_dir)
+        # Parse structured fields from the body
+        parsed = _parse_finding_fields(raw_body)
 
-        # For now, each finding is a single unit (no sub-findings from narrative)
-        # The builder will render it as H3 with body text
+        # Resolve chart path
+        chart_path = _find_chart_for_finding(
+            parsed.get("chart_ref", ""), raw_body, charts_dir
+        )
+
+        # Build clean body from Detail + Impact (no Headline duplicate, no Chart/Source lines)
+        body_parts = []
+        if parsed.get("detail"):
+            body_parts.append(parsed["detail"])
+        if parsed.get("impact"):
+            body_parts.append(parsed["impact"])
+        if parsed.get("metrics"):
+            body_parts.append(parsed["metrics"])
+
+        clean_body = "\n\n".join(body_parts) if body_parts else parsed.get("fallback_body", "")
+
+        # Build summary from the Headline field or first sentence of detail
+        summary_source = parsed.get("headline_text") or parsed.get("detail") or clean_body
+        summary = _first_sentence(summary_source)
+
+        # Sub-finding title: use "Detail" to avoid duplicating the H3 headline
+        sub_title = "Detail" if parsed.get("detail") else headline
+
+        # Build sub-finding
         sub = SubFinding(
-            title=headline,
-            body=body,
+            title=sub_title,
+            body=clean_body,
             chart_path=chart_path,
             chart_caption=headline,
         )
+
+        # Build data_stamp from Source field if available
+        data_stamp = None
+        if parsed.get("source"):
+            data_stamp = f"[{parsed['source']}]"
+
         findings.append(Finding(
             headline=headline,
-            summary=_first_sentence(body),
+            summary=summary,
             sub_findings=[sub],
+            data_stamp=data_stamp,
         ))
 
     return findings
 
 
-def _find_chart_for_finding(body: str, charts_dir: str) -> Optional[str]:
-    """Look for chart file references in finding body text."""
-    # Match patterns like: ![...](outputs/charts/filename.png)
-    # or: `outputs/charts/filename.png`
-    # or: charts/filename.png
-    patterns = [
-        r"!\[.*?\]\(([^)]*\.png)\)",
-        r"`((?:outputs/)?charts/[^`]+\.png)`",
-        r"((?:outputs/)?charts/\S+\.png)",
-    ]
-    for pat in patterns:
-        match = re.search(pat, body)
+def _parse_finding_fields(body: str) -> dict:
+    """Parse structured fields from a finding body.
+
+    Recognizes: **Headline:**, **Detail:**, **Impact:**, **Metrics:**,
+    **Chart:**, **Source:**.
+
+    Returns dict with keys: headline_text, detail, impact, metrics,
+    chart_ref, source, fallback_body.
+    """
+    result = {}
+
+    # Extract known **Label:** fields
+    field_patterns = {
+        "headline_text": r'\*\*Headline:\*\*\s*(.+?)(?=\n\*\*\w|\n---|\Z)',
+        "detail": r'\*\*Detail:\*\*\s*(.+?)(?=\n\*\*\w|\n---|\Z)',
+        "impact": r'\*\*Impact:\*\*\s*(.+?)(?=\n\*\*\w|\n---|\Z)',
+        "chart_ref": r'\*\*Chart:\*\*\s*(\S+\.png)',
+        "source": r'\*\*Source:\*\*\s*(.+?)(?=\n\*\*\w|\n---|\Z)',
+    }
+
+    for key, pattern in field_patterns.items():
+        match = re.search(pattern, body, re.DOTALL)
         if match:
-            ref = match.group(1)
-            # Try as absolute, relative to charts_dir, or relative to cwd
-            for candidate in [ref, os.path.join(charts_dir, os.path.basename(ref))]:
-                if os.path.isfile(candidate):
-                    return os.path.abspath(candidate)
+            result[key] = match.group(1).strip()
+
+    # Extract **Metrics:** block (bullet list)
+    metrics_match = re.search(
+        r'\*\*Metrics:\*\*\s*\n((?:- .+\n?)+)', body
+    )
+    if metrics_match:
+        raw_metrics = metrics_match.group(1).strip()
+        # Format as clean bullet points (strip pipe-delimited format)
+        metric_lines = []
+        for line in raw_metrics.split("\n"):
+            line = line.strip().lstrip("- ").strip()
+            if "|" in line:
+                parts = [p.strip() for p in line.split("|")]
+                # Format: "value — label (context)"
+                if len(parts) >= 2:
+                    metric_lines.append(f"{parts[0]} — {parts[1]}" +
+                                         (f" ({parts[2]})" if len(parts) >= 3 else ""))
+                else:
+                    metric_lines.append(line)
+            else:
+                metric_lines.append(line)
+        result["metrics"] = "\n".join(metric_lines)
+
+    # If no structured fields found, use cleaned body as fallback
+    if not any(k in result for k in ("detail", "impact", "headline_text")):
+        result["fallback_body"] = _strip_markdown(body)
+
+    return result
+
+
+def _find_chart_for_finding(chart_ref: str, body: str,
+                             charts_dir: str) -> Optional[str]:
+    """Look for chart file references in finding body text.
+
+    Checks (in order):
+    1. Explicit chart_ref from **Chart:** field parsing
+    2. Markdown image syntax: ![...](path.png)
+    3. Backtick-wrapped paths: `outputs/charts/file.png`
+    4. Bare paths: charts/file.png or outputs/charts/file.png
+    """
+    # Collect all candidate filenames
+    candidates = []
+
+    # From **Chart:** field (highest priority)
+    if chart_ref:
+        candidates.append(chart_ref)
+
+    # Markdown image syntax
+    for match in re.finditer(r"!\[.*?\]\(([^)]*\.png)\)", body):
+        candidates.append(match.group(1))
+
+    # Backtick paths
+    for match in re.finditer(r"`((?:outputs/)?charts/[^`]+\.png)`", body):
+        candidates.append(match.group(1))
+
+    # Bare paths
+    for match in re.finditer(r"((?:outputs/)?charts/\S+\.png)", body):
+        candidates.append(match.group(1))
+
+    # Try to resolve each candidate
+    for ref in candidates:
+        basename = os.path.basename(ref)
+        for path in [
+            ref,
+            os.path.join(charts_dir, basename),
+            os.path.join("outputs", "charts", basename),
+        ]:
+            if os.path.isfile(path):
+                return os.path.abspath(path)
+
     return None
 
 
@@ -167,6 +299,8 @@ def _first_sentence(text: str) -> str:
     text = text.strip()
     # Remove markdown image references
     text = re.sub(r"!\[.*?\]\([^)]*\)", "", text).strip()
+    # Strip markdown bold markers
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     match = re.match(r"(.+?\.)\s", text)
     return match.group(1) if match else text[:200]
 
@@ -179,6 +313,13 @@ def _parse_recommendations(text: str) -> list[Recommendation]:
     if not rec_text:
         return []
 
+    # Strip trailing close-the-loop content (**Track:**, **Next step:**, **Decision owner:**, ---)
+    rec_text = re.split(
+        r'\n\*\*(?:Track|Next step|Decision owner|Review date):',
+        rec_text, maxsplit=1,
+    )[0]
+    rec_text = re.split(r'\n---', rec_text, maxsplit=1)[0]
+
     recs = []
     # Match numbered items: 1. **Action**: Description. Confidence level.
     items = re.findall(
@@ -187,15 +328,20 @@ def _parse_recommendations(text: str) -> list[Recommendation]:
     )
     for action, detail in items:
         detail = detail.strip()
-        # Extract confidence if mentioned
+        # Extract confidence if mentioned (handle **Confidence: HIGH** format too)
         conf_match = re.search(
-            r"[Cc]onfidence(?:\s+level)?:?\s*(High|Medium|Low)",
-            detail, re.IGNORECASE,
+            r"\*{0,2}[Cc]onfidence(?:\s+level)?:?\s*(HIGH|High|MEDIUM|Medium|LOW|Low)\*{0,2}",
+            detail,
         )
         confidence = conf_match.group(1).capitalize() if conf_match else "Medium"
-        # Clean confidence mention from rationale
-        rationale = re.sub(r"\s*[Cc]onfidence(?:\s+level)?:?\s*(High|Medium|Low)\.?",
-                           "", detail).strip()
+        # Clean confidence mention and surrounding **markers from rationale
+        rationale = re.sub(
+            r"\s*\*{0,2}[Cc]onfidence(?:\s+level)?:?\s*(?:HIGH|High|MEDIUM|Medium|LOW|Low)\*{0,2}"
+            r"[^.]*\.?",
+            "", detail,
+        ).strip()
+        # Strip remaining markdown artifacts from rationale
+        rationale = _strip_markdown(rationale)
         recs.append(Recommendation(
             action=action.strip(),
             rationale=rationale,
@@ -207,16 +353,18 @@ def _parse_recommendations(text: str) -> list[Recommendation]:
 
 def _parse_insight(text: str) -> Optional[str]:
     """Parse the ## Insight section (maps to Synthesis)."""
-    return _extract_between(text, "Insight", [
+    raw = _extract_between(text, "Insight", [
         "Implication", "Recommendations",
     ])
+    return _strip_markdown(raw) if raw else None
 
 
 def _parse_implication(text: str) -> Optional[str]:
     """Parse the ## Implication section."""
-    return _extract_between(text, "Implication", [
+    raw = _extract_between(text, "Implication", [
         "Recommendations", "Supporting Data",
     ])
+    return _strip_markdown(raw) if raw else None
 
 
 # ---------------------------------------------------------------------------
@@ -271,7 +419,7 @@ def _parse_validation(text: str) -> dict:
     match = re.search(r"Data Quality Notes\s*\n(.+?)(?=\n##|\Z)",
                       text, re.DOTALL)
     if match:
-        caveat = match.group(1).strip()
+        caveat = _strip_markdown(match.group(1).strip())
         if caveat and caveat.lower() != "none":
             result["caveat"] = caveat[:200]  # truncate long caveats
 
