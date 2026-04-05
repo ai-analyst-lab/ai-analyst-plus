@@ -5,6 +5,8 @@ Reads:
   - working/pipeline_summary.md    → dataset name, date, metadata
   - outputs/validation_*.md        → confidence grade/score
   - outputs/close_the_loop_*.md    → success tracking, action items
+  - working/cross_verification_*.yaml → provenance data stamps
+  - working/query_log_*.jsonl      → SQL per finding
 
 All files are optional. Missing files produce None values, not errors.
 """
@@ -12,15 +14,19 @@ All files are optional. Missing files produce None values, not errors.
 from __future__ import annotations
 
 import glob
+import json
+import logging
 import os
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from helpers.gdoc_builder import (
     AnalysisData, Finding, SubFinding, Recommendation, SqlQuery,
     SuccessTracking,
 )
+
+_log = logging.getLogger("gdoc_narrative_parser")
 
 
 def _find_latest(pattern: str, base_dir: str) -> Optional[str]:
@@ -294,6 +300,181 @@ def _collect_sql(base_dir: str) -> list[SqlQuery]:
 
 
 # ---------------------------------------------------------------------------
+# Provenance enrichment
+# ---------------------------------------------------------------------------
+
+def _load_yaml_safe(path: str) -> Any:
+    """Load a YAML file, return None on any error."""
+    try:
+        import yaml
+        with open(path, "r") as f:
+            return yaml.safe_load(f)
+    except Exception:
+        return None
+
+
+def _load_jsonl(path: str) -> list[dict]:
+    """Load a JSONL file into a list of dicts."""
+    entries = []
+    try:
+        with open(path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    entries.append(json.loads(line))
+    except Exception:
+        pass
+    return entries
+
+
+def _enrich_findings_with_provenance(
+    findings: list[Finding],
+    base_dir: str,
+    confidence_grade: str | None = None,
+    confidence_score: int | None = None,
+) -> list | None:
+    """Enrich findings with provenance data (data stamps, methodology, SQL, cross-verification).
+
+    Loads cross-verification YAML and query log JSONL from working/,
+    builds provenance blocks via provenance_assembler, then populates
+    Finding.data_stamp, .methodology, .sql, and .cross_verification.
+
+    Returns provenance_blocks list for AnalysisData.provenance_blocks,
+    or None if enrichment could not run.
+    """
+    try:
+        from helpers.provenance_assembler import (
+            build_provenance_blocks,
+            render_data_stamp,
+        )
+    except ImportError:
+        _log.debug("provenance_assembler not available, skipping enrichment")
+        return None
+
+    working_dir = os.path.join(base_dir, "working")
+
+    # Load cross-verification data
+    cv_path = _find_latest("cross_verification_*.yaml", working_dir)
+    cv_data = None
+    if cv_path:
+        raw = _load_yaml_safe(cv_path)
+        if isinstance(raw, dict):
+            cv_data = raw.get("claims", [])
+        elif isinstance(raw, list):
+            cv_data = raw
+
+    # Load query log entries
+    ql_path = _find_latest("query_log_*.jsonl", working_dir)
+    ql_entries = _load_jsonl(ql_path) if ql_path else []
+
+    # Build finding dicts for provenance_assembler
+    finding_dicts = []
+    for i, f in enumerate(findings, 1):
+        # Try to extract table name and date range from the finding text
+        primary_table = ""
+        date_range = ""
+        row_count = 0
+
+        # Check if there's a matching query log entry for this finding
+        for entry in ql_entries:
+            purpose = entry.get("purpose", "")
+            # Match by finding index or headline keywords
+            headline_lower = f.headline.lower()
+            if (f"finding {i}" in purpose.lower()
+                    or any(word in purpose.lower()
+                           for word in headline_lower.split()[:3] if len(word) > 3)):
+                row_count = entry.get("rows", 0) or 0
+                sql_text = entry.get("sql", "")
+                # Extract table from SQL (simple FROM clause extraction)
+                table_match = re.search(r'\bFROM\s+(\S+)', sql_text, re.IGNORECASE)
+                if table_match:
+                    primary_table = table_match.group(1).strip('";`').upper()
+                # Extract date range from SQL
+                date_matches = re.findall(r"'(\d{4}-\d{2}-\d{2})'", sql_text)
+                if len(date_matches) >= 2:
+                    date_range = f"{date_matches[0]} to {date_matches[-1]}"
+                elif len(date_matches) == 1:
+                    date_range = f"from {date_matches[0]}"
+                break
+
+        finding_dicts.append({
+            "finding_id": f"F{i}",
+            "finding_title": f.headline,
+            "row_count": row_count,
+            "date_range": date_range,
+            "primary_table": primary_table,
+            "sql": "",  # will be populated from query log below
+        })
+
+    # Try to match each finding to its SQL from query log
+    for i, fd in enumerate(finding_dicts):
+        for entry in ql_entries:
+            purpose = entry.get("purpose", "")
+            headline_lower = findings[i].headline.lower()
+            if (f"finding {i+1}" in purpose.lower()
+                    or any(word in purpose.lower()
+                           for word in headline_lower.split()[:3] if len(word) > 3)):
+                fd["sql"] = entry.get("sql", "")
+                break
+
+    # Build confidence result dict
+    confidence_result = None
+    if confidence_grade:
+        confidence_result = {
+            "grade": confidence_grade,
+            "score": confidence_score,
+        }
+
+    # Build provenance blocks
+    blocks = build_provenance_blocks(
+        findings=finding_dicts,
+        cross_verification=cv_data,
+        confidence_result=confidence_result,
+        query_log_entries=ql_entries,
+    )
+
+    # Populate Finding fields from provenance blocks
+    for i, block in enumerate(blocks):
+        if i >= len(findings):
+            break
+
+        finding = findings[i]
+
+        # Data stamp one-liner
+        stamp = block.get("data_stamp", {})
+        one_liner = stamp.get("one_liner", "")
+        if one_liner and stamp.get("row_count", 0) > 0:
+            finding.data_stamp = one_liner
+
+        # Methodology
+        meth = block.get("methodology")
+        if meth and meth.get("approach"):
+            parts = [f"Approach: {meth['approach']}"]
+            if meth.get("aggregation"):
+                parts.append(f"Aggregation: {meth['aggregation']}")
+            if meth.get("filters"):
+                parts.append(f"Filters: {', '.join(meth['filters'])}")
+            if meth.get("date_handling"):
+                parts.append(f"Date handling: {meth['date_handling']}")
+            finding.methodology = ". ".join(parts)
+
+        # SQL
+        sql_block = block.get("sql")
+        if sql_block and sql_block.get("query_full"):
+            finding.sql = sql_block["query_full"]
+
+        # Cross-verification
+        cv = block.get("cross_verification")
+        if cv and cv.get("method") != "None":
+            finding.cross_verification = (
+                f"{cv['method']} — {cv['result']}"
+                + (f" ({cv['detail']})" if cv.get("detail") else "")
+            )
+
+    return blocks
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -354,6 +535,16 @@ def parse_pipeline_outputs(base_dir: str = ".") -> AnalysisData:
     confidence_score = validation.get("score")
     confidence_caveat = validation.get("caveat")
 
+    # Enrich findings with provenance (data stamps, methodology, SQL, cross-verification)
+    provenance_blocks = None
+    if findings:
+        try:
+            provenance_blocks = _enrich_findings_with_provenance(
+                findings, base_dir, confidence_grade, confidence_score,
+            )
+        except Exception as e:
+            _log.warning("Provenance enrichment failed (non-fatal): %s", e)
+
     # Collect SQL queries
     sql_queries = _collect_sql(base_dir)
 
@@ -412,4 +603,5 @@ def parse_pipeline_outputs(base_dir: str = ".") -> AnalysisData:
         open_questions=open_questions,
         sql_queries=sql_queries,
         data_sources=f"Dataset: {dataset}" if dataset else None,
+        provenance_blocks=provenance_blocks,
     )

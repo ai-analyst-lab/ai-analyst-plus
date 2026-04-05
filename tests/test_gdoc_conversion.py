@@ -24,7 +24,12 @@ Manual test checklist (check each in the converted Google Doc):
     [ ] Internal bookmark links (>> See Finding 1 jumps to Finding 1)
     [ ] Page breaks between major sections
     [ ] Bold label detection ("The Insight:" auto-bolded)
-    [ ] Spacing: empty paragraphs between sections, around charts/tables
+    [ ] Confidence badge renders as colored shaded cell (green/yellow/orange)
+    [ ] Data stamp renders as gray shaded cell under Finding heading
+    [ ] Methodology & SQL section appears under findings (H4 gray heading)
+    [ ] Cross-verification label renders in gray italic
+    [ ] Resources section shows "Additional Queries" (not duplicating inline SQL)
+    [ ] Tighter spacing (no triple blank lines between sections)
 """
 
 import os
@@ -130,6 +135,25 @@ def generate_test_fixture():
                         ),
                     ),
                 ],
+                data_stamp="[1.2M rows | Jan-Mar 2026 | CHECKOUT_EVENTS | Confidence: B+ (85/100)]",
+                methodology=(
+                    "Approach: segmented comparison of mobile vs desktop checkout funnels. "
+                    "Aggregation: COUNT DISTINCT user_id by step and device. "
+                    "Filters: date >= '2026-01-01', status IN ('completed', 'abandoned'). "
+                    "Date handling: monthly granularity, UTC."
+                ),
+                sql=(
+                    "SELECT\n"
+                    "  device_type,\n"
+                    "  step_name,\n"
+                    "  COUNT(DISTINCT user_id) AS users\n"
+                    "FROM checkout_events\n"
+                    "WHERE event_date >= '2026-01-01'\n"
+                    "  AND status IN ('completed', 'abandoned')\n"
+                    "GROUP BY device_type, step_name\n"
+                    "ORDER BY device_type, step_name"
+                ),
+                cross_verification="Type B: Parts-to-whole — PASS (Within 0.30% tolerance)",
             ),
             Finding(
                 headline="Bookmark links connect Summary to Analysis",
@@ -144,6 +168,9 @@ def generate_test_fixture():
                         ),
                     ),
                 ],
+                data_stamp="[340K rows | Jan-Mar 2026 | FUNNEL_EVENTS | Confidence: B+ (85/100)]",
+                methodology="Approach: bookmark navigation verification. No SQL required.",
+                cross_verification="Type A: Boundary check — PASS (3 checks passed)",
             ),
             Finding(
                 headline="Missing chart shows placeholder",
@@ -156,6 +183,7 @@ def generate_test_fixture():
                         chart_caption="This should not appear",
                     ),
                 ],
+                # No provenance fields — tests backward compatibility
             ),
         ],
         synthesis=(

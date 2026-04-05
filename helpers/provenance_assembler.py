@@ -96,6 +96,7 @@ class ProvenanceBlock(TypedDict):
     cross_verification: Optional[CrossVerificationSummary]
     validation: Optional[ValidationSummary]
     reproducibility: Optional[ReproducibilityInfo]
+    query_ids: List[str]                                # Backing query log IDs
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +290,19 @@ def build_provenance_blocks(
             if cid:
                 cv_index[cid] = cv
 
+    # Index query log entries for finding-to-query linkage
+    ql_by_claim: Dict[str, List[str]] = {}    # claim_id -> [query_ids]
+    ql_by_table: Dict[str, List[str]] = {}    # TABLE_NAME -> [query_ids]
+    if query_log_entries:
+        for qe in query_log_entries:
+            qid = qe.get("query_id", "")
+            # Index by explicit claim_ids
+            for cid in qe.get("claim_ids", []):
+                ql_by_claim.setdefault(cid, []).append(qid)
+            # Index by tables_accessed (uppercased for case-insensitive match)
+            for tbl in qe.get("tables_accessed", []):
+                ql_by_table.setdefault(tbl.upper(), []).append(qid)
+
     blocks: List[ProvenanceBlock] = []
 
     for finding in findings:
@@ -351,6 +365,22 @@ def build_provenance_blocks(
             deterministic=connection_type in ("duckdb", "csv"),
         )
 
+        # Match finding to backing query log entries
+        matched_qids: List[str] = []
+        # Priority 1: explicit claim_ids referencing this finding
+        if fid in ql_by_claim:
+            matched_qids.extend(ql_by_claim[fid])
+        # Priority 2: table name match (if no explicit claim link)
+        if not matched_qids and primary_table:
+            matched_qids.extend(ql_by_table.get(primary_table.upper(), []))
+        # Deduplicate while preserving order
+        seen: set[str] = set()
+        unique_qids: List[str] = []
+        for qid in matched_qids:
+            if qid not in seen:
+                seen.add(qid)
+                unique_qids.append(qid)
+
         block = ProvenanceBlock(
             finding_id=fid,
             finding_title=title,
@@ -360,6 +390,7 @@ def build_provenance_blocks(
             cross_verification=cv_summary,
             validation=None,  # Filled by validation agent downstream
             reproducibility=repro,
+            query_ids=unique_qids,
         )
         blocks.append(block)
 
@@ -469,5 +500,9 @@ def render_provenance_appendix(block: ProvenanceBlock) -> str:
         if v.get("warnings"):
             for w in v["warnings"]:
                 parts.append(f"- {w}")
+
+    if block.get("query_ids"):
+        parts.append("")
+        parts.append(f"**Backing queries:** {', '.join(block['query_ids'])}")
 
     return "\n".join(parts)

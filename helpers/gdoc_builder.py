@@ -62,6 +62,10 @@ class Finding:
     headline: str  # action headline
     summary: str
     sub_findings: list[SubFinding] = field(default_factory=list)
+    data_stamp: Optional[str] = None        # "[1.5M rows | Jan-Mar 2026 | ORDERS | A (93)]"
+    methodology: Optional[str] = None       # "Approach: variance decomposition..."
+    sql: Optional[str] = None               # full SQL query text
+    cross_verification: Optional[str] = None # "Type B: Parts-to-whole -- PASS"
 
 
 @dataclass
@@ -111,6 +115,7 @@ class AnalysisData:
     sql_queries: list[SqlQuery] = field(default_factory=list)
     companion_analyses: Optional[str] = None
     data_sources: Optional[str] = None
+    provenance_blocks: Optional[list] = None  # from provenance_assembler
 
 
 # ---------------------------------------------------------------------------
@@ -255,6 +260,107 @@ def _confidence_sort_key(rec: Recommendation) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Provenance helpers (data stamps, methodology, confidence badges)
+# ---------------------------------------------------------------------------
+
+# Badge shading colors by grade
+_BADGE_COLORS = {
+    "A": "D4EDDA",   # green
+    "B": "FFF3CD",   # yellow
+    "C": "FFE0B2",   # orange
+}
+_BADGE_DEFAULT_COLOR = "E8E8E8"  # gray
+
+
+def _add_data_stamp(doc, stamp_text: str) -> None:
+    """Add a gray-shaded data stamp cell (like Notion's gray callout).
+
+    Renders a single-row table with gray background, 9pt italic text.
+    Skips if stamp_text is empty or starts with "[0 rows".
+    """
+    if not stamp_text or stamp_text.startswith("[0 rows"):
+        return
+
+    table = doc.add_table(rows=1, cols=1)
+    table.style = "Table Grid"
+    cell = table.cell(0, 0)
+    _set_cell_shading(cell, _SQL_BG_COLOR)
+
+    cell.text = ""
+    p = cell.paragraphs[0]
+    run = p.add_run(stamp_text)
+    _style_run(run, size=Pt(9), color=_CAPTION_COLOR, italic=True)
+
+
+def _add_methodology_sql_section(doc, methodology: str = None,
+                                  sql: str = None,
+                                  cross_verification: str = None) -> None:
+    """Add a Methodology & SQL section under a finding.
+
+    Renders methodology as italic text, SQL in a gray monospace cell,
+    and cross-verification as labeled gray italic text.
+    Only renders if at least one field is non-None.
+    """
+    if not any([methodology, sql, cross_verification]):
+        return
+
+    h = doc.add_heading("Methodology & SQL", level=4)
+    for run in h.runs:
+        run.font.color.rgb = _CAPTION_COLOR
+
+    if methodology:
+        p = doc.add_paragraph()
+        run = p.add_run(methodology)
+        _style_run(run, size=Pt(10), color=_BODY_COLOR, italic=True)
+
+    if sql:
+        table = doc.add_table(rows=1, cols=1)
+        table.style = "Table Grid"
+        cell = table.cell(0, 0)
+        _set_cell_shading(cell, _SQL_BG_COLOR)
+        cell.text = ""
+        p_sql = cell.paragraphs[0]
+        run_sql = p_sql.add_run(sql.strip())
+        _style_run(run_sql, font_name=_SQL_FONT, size=_SQL_SIZE)
+
+    if cross_verification:
+        p = doc.add_paragraph()
+        run_label = p.add_run("Cross-verification: ")
+        _style_run(run_label, size=Pt(9), color=_CAPTION_COLOR, bold=True,
+                    italic=True)
+        run_val = p.add_run(cross_verification)
+        _style_run(run_val, size=Pt(9), color=_CAPTION_COLOR, italic=True)
+
+
+def _add_confidence_badge(doc, grade: str, score: int = None,
+                           caveat: str = None) -> None:
+    """Add a colored confidence badge as a shaded table cell.
+
+    Green for A, yellow for B, orange for C, gray default.
+    """
+    badge_text = f"Analysis Confidence: {grade}"
+    if score is not None:
+        badge_text += f" ({score}/100)"
+
+    color = _BADGE_COLORS.get(grade[0] if grade else "", _BADGE_DEFAULT_COLOR)
+
+    table = doc.add_table(rows=1, cols=1)
+    table.style = "Table Grid"
+    cell = table.cell(0, 0)
+    _set_cell_shading(cell, color)
+
+    cell.text = ""
+    p = cell.paragraphs[0]
+    run = p.add_run(badge_text)
+    _style_run(run, bold=True, size=Pt(11))
+
+    if caveat:
+        p_caveat = doc.add_paragraph()
+        run_caveat = p_caveat.add_run(caveat)
+        _style_run(run_caveat, italic=True, size=Pt(10), color=_CAPTION_COLOR)
+
+
+# ---------------------------------------------------------------------------
 # Section builders
 # ---------------------------------------------------------------------------
 
@@ -274,18 +380,9 @@ def _build_title_block(doc: Document, data: AnalysisData) -> None:
         _add_body_paragraph(doc, " | ".join(parts))
 
     if data.confidence_grade is not None:
-        badge_text = f"Analysis Confidence: {data.confidence_grade}"
-        if data.confidence_score is not None:
-            badge_text += f" ({data.confidence_score}/100)"
+        _add_confidence_badge(doc, data.confidence_grade,
+                               data.confidence_score, data.confidence_caveat)
 
-        p = doc.add_paragraph()
-        run = p.add_run(badge_text)
-        _style_run(run, bold=True)
-
-        if data.confidence_caveat:
-            _add_body_paragraph(doc, data.confidence_caveat, italic=True)
-
-    _add_spacing_paragraph(doc)
     _add_spacing_paragraph(doc)
 
 
@@ -294,21 +391,17 @@ def _build_context(doc: Document, data: AnalysisData) -> None:
     if not data.context:
         return
     _add_heading(doc, "Context", level=2)
-    _add_spacing_paragraph(doc)
     _add_body_paragraph(doc, data.context)
-    _add_spacing_paragraph(doc)
 
 
 def _build_summary(doc: Document, data: AnalysisData,
                    figure_counter: list) -> None:
     """H2 Summary with Primary Learnings (>> linked) and Recommendations."""
     _add_heading(doc, "Summary", level=2)
-    _add_spacing_paragraph(doc)
 
     # Primary Learnings
     if data.findings:
         _add_heading(doc, "Primary Learnings", level=3)
-        _add_spacing_paragraph(doc)
 
         for i, finding in enumerate(data.findings, 1):
             p = doc.add_paragraph()
@@ -329,12 +422,9 @@ def _build_summary(doc: Document, data: AnalysisData,
             bookmark_name = f"finding-{i}"
             _add_hyperlink(p, f">> See Finding {i}", bookmark_name)
 
-        _add_spacing_paragraph(doc)
-
     # Recommendations
     if data.recommendations:
         _add_heading(doc, "Recommendations", level=3)
-        _add_spacing_paragraph(doc)
 
         sorted_recs = sorted(data.recommendations, key=_confidence_sort_key)
         for i, rec in enumerate(sorted_recs, 1):
@@ -349,8 +439,6 @@ def _build_summary(doc: Document, data: AnalysisData,
             )
             _style_run(run_detail)
 
-        _add_spacing_paragraph(doc)
-
     _add_spacing_paragraph(doc)
 
 
@@ -362,13 +450,15 @@ def _build_analysis(doc: Document, data: AnalysisData,
 
     doc.add_page_break()
     _add_heading(doc, "Analysis", level=2)
-    _add_spacing_paragraph(doc)
 
     for i, finding in enumerate(data.findings, 1):
         bookmark_name = f"finding-{i}"
         _add_heading(doc, f"Finding {i}: {finding.headline}", level=3,
                      bookmark_name=bookmark_name)
-        _add_spacing_paragraph(doc)
+
+        # Data stamp (gray shaded cell)
+        if finding.data_stamp:
+            _add_data_stamp(doc, finding.data_stamp)
 
         if finding.summary:
             _add_body_paragraph(doc, finding.summary)
@@ -385,7 +475,6 @@ def _build_analysis(doc: Document, data: AnalysisData,
 
             # Chart
             if sub.chart_path and os.path.isfile(sub.chart_path):
-                _add_spacing_paragraph(doc)
                 try:
                     doc.add_picture(sub.chart_path, width=_CHART_WIDTH)
                     # Center the image
@@ -409,7 +498,6 @@ def _build_analysis(doc: Document, data: AnalysisData,
                         f"[Chart: {filename} \u2014 could not embed: {e}]",
                         italic=True,
                     )
-                _add_spacing_paragraph(doc)
             elif sub.chart_path:
                 # Missing chart placeholder
                 filename = os.path.basename(sub.chart_path)
@@ -419,14 +507,20 @@ def _build_analysis(doc: Document, data: AnalysisData,
                     f"[Chart: {filename} \u2014 file not found]",
                     italic=True,
                 )
-                _add_spacing_paragraph(doc)
+
+        # Methodology & SQL section (after all sub-findings)
+        _add_methodology_sql_section(
+            doc,
+            methodology=finding.methodology,
+            sql=finding.sql,
+            cross_verification=finding.cross_verification,
+        )
 
         _add_spacing_paragraph(doc)
 
     # Synthesis
     if data.synthesis:
         _add_heading(doc, "Synthesis", level=3)
-        _add_spacing_paragraph(doc)
         _add_body_paragraph(doc, data.synthesis)
 
         if data.confidence_grade:
@@ -437,14 +531,11 @@ def _build_analysis(doc: Document, data: AnalysisData,
             if data.confidence_caveat:
                 conf_note += f" {data.confidence_caveat}"
             _add_body_paragraph(doc, conf_note, italic=True)
-        _add_spacing_paragraph(doc)
 
     # Implications
     if data.implications:
         _add_heading(doc, "Implications", level=3)
-        _add_spacing_paragraph(doc)
         _add_body_paragraph(doc, data.implications)
-        _add_spacing_paragraph(doc)
 
 
 def _build_next_steps(doc: Document, data: AnalysisData) -> None:
@@ -456,55 +547,66 @@ def _build_next_steps(doc: Document, data: AnalysisData) -> None:
 
     doc.add_page_break()
     _add_heading(doc, "Next Steps", level=2)
-    _add_spacing_paragraph(doc)
 
     if data.next_steps_actions:
         _add_heading(doc, "Recommended Actions", level=3)
-        _add_spacing_paragraph(doc)
         for line in data.next_steps_actions.strip().split("\n"):
             line = line.strip()
             if line:
                 _add_body_paragraph(doc, line)
-        _add_spacing_paragraph(doc)
 
     if data.success_tracking:
         _add_heading(doc, "Success Tracking", level=3)
-        _add_spacing_paragraph(doc)
         st = data.success_tracking
         _add_body_paragraph(doc, f"Metric: {st.metric}", bold=True)
         _add_body_paragraph(doc, f"Baseline: {st.baseline}")
         _add_body_paragraph(doc, f"Target: {st.target}")
         if st.check_in_date:
             _add_body_paragraph(doc, f"Check-in: {st.check_in_date}")
-        _add_spacing_paragraph(doc)
 
     if data.open_questions:
         _add_heading(doc, "Open Questions", level=3)
-        _add_spacing_paragraph(doc)
         for line in data.open_questions.strip().split("\n"):
             line = line.strip()
             if line:
                 _add_body_paragraph(doc, line)
-        _add_spacing_paragraph(doc)
 
 
 def _build_resources(doc: Document, data: AnalysisData) -> None:
-    """H2 Resources with SQL queries, companion analyses, data sources."""
-    has_content = (data.sql_queries or data.companion_analyses
+    """H2 Resources with SQL queries, companion analyses, data sources.
+
+    SQL that is already shown inline with findings is filtered out to avoid
+    duplication. If some SQL is inline, the heading becomes "Additional Queries".
+    """
+    # Determine which SQL is already inline with findings
+    inline_sqls: set[str] = set()
+    for f in data.findings:
+        if f.sql:
+            inline_sqls.add(f.sql.strip())
+
+    # Filter to orphan queries (not already inline)
+    if inline_sqls:
+        orphan_queries = [
+            q for q in data.sql_queries
+            if q.sql.strip() not in inline_sqls
+        ]
+    else:
+        orphan_queries = list(data.sql_queries)
+
+    has_content = (orphan_queries or data.companion_analyses
                    or data.data_sources)
     if not has_content:
         return
 
     doc.add_page_break()
     _add_heading(doc, "Resources", level=2)
-    _add_spacing_paragraph(doc)
 
-    # SQL Queries
-    if data.sql_queries:
-        _add_heading(doc, "Queries", level=3)
-        _add_spacing_paragraph(doc)
+    # SQL Queries (only orphans)
+    if orphan_queries:
+        heading = "Additional Queries" if inline_sqls else "Queries"
+        _add_heading(doc, heading, level=3)
 
-        for j, query in enumerate(data.sql_queries, 1):
+        for j, query in enumerate(orphan_queries, 1):
             bookmark_name = f"query-{j}"
             _add_heading(doc, f"Query {j}: {query.title}", level=4,
                          bookmark_name=bookmark_name)
@@ -520,7 +622,6 @@ def _build_resources(doc: Document, data: AnalysisData) -> None:
                 _add_body_paragraph(doc, f"Database: {query.database}")
 
             # SQL in gray-shaded monospace table cell
-            _add_spacing_paragraph(doc)
             table = doc.add_table(rows=1, cols=1)
             table.style = "Table Grid"
             cell = table.cell(0, 0)
@@ -532,24 +633,18 @@ def _build_resources(doc: Document, data: AnalysisData) -> None:
             run_sql = p_sql.add_run(query.sql.strip())
             _style_run(run_sql, font_name=_SQL_FONT, size=_SQL_SIZE)
 
-            _add_spacing_paragraph(doc)
-
     # Companion Analyses
     if data.companion_analyses:
         _add_heading(doc, "Companion Analyses", level=3)
-        _add_spacing_paragraph(doc)
         for line in data.companion_analyses.strip().split("\n"):
             line = line.strip()
             if line:
                 p = doc.add_paragraph(line, style="List Bullet")
-        _add_spacing_paragraph(doc)
 
     # Data Sources
     if data.data_sources:
         _add_heading(doc, "Data Sources", level=3)
-        _add_spacing_paragraph(doc)
         _add_body_paragraph(doc, data.data_sources)
-        _add_spacing_paragraph(doc)
 
 
 # ---------------------------------------------------------------------------

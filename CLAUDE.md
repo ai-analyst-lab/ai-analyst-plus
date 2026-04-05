@@ -87,6 +87,7 @@ condition matches -- you do not need to be asked.
 | Export | `.claude/skills/export/skill.md` | Invoked as `/export {format}` — export results as slides, email, slack, brief, data, gdoc (Google Doc with charts + SQL), or docx (local Word file) |
 | Connect Data | `.claude/skills/connect-data/skill.md` | Invoked as `/connect-data` — add a new dataset connection |
 | Setup Snowflake | `.claude/skills/setup-snowflake/skill.md` | Invoked as `/setup-snowflake` — guided Snowflake credential setup, MCP connection test, and data exploration |
+| Setup Notion | `.claude/skills/setup-notion/skill.md` | Invoked as `/setup-notion` — guided Notion MCP setup with OAuth, connection test, and Analysis Gallery detection |
 | Metrics | `.claude/skills/metrics/skill.md` | Invoked as `/metrics` — view and manage metric dictionary entries |
 | Compare Datasets | `.claude/skills/compare-datasets/skill.md` | Comparing metrics or patterns across two datasets |
 | Forecast | `.claude/skills/forecast/skill.md` | Producing a time-series forecast or projection |

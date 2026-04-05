@@ -86,9 +86,13 @@ Otherwise, build from available artifacts:
 
 ```python
 from helpers.provenance_assembler import build_provenance_blocks, render_data_stamp
+from helpers.query_log import read_log
+
+# Load query log entries for finding-to-query linkage
+log_entries = read_log("{{DATASET_NAME}}", "{{DATE}}")
 
 # Gather finding metadata from narrative
-blocks = build_provenance_blocks(findings_from_narrative)
+blocks = build_provenance_blocks(findings_from_narrative, query_log_entries=log_entries)
 ```
 
 For each finding, prepare:

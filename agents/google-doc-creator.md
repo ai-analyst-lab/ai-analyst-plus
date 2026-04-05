@@ -243,8 +243,13 @@ if cv_path:
 confidence = None
 # Extract from validation report if available
 
+# Load query log entries for finding-to-query linkage
+from helpers.query_log import read_log
+log_entries = read_log("{{DATASET_NAME}}", "{{DATE}}")
+
 blocks = build_provenance_blocks(
-    findings, cross_verification=cv_data, confidence_result=confidence
+    findings, cross_verification=cv_data, confidence_result=confidence,
+    query_log_entries=log_entries,
 )
 ```
 
