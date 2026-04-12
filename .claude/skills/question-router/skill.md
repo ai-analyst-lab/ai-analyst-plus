@@ -199,6 +199,59 @@ If `.knowledge/user/profile.md` exists, read the user's preferences:
 - **Technical level = "advanced":** Show more SQL, skip explanations
 - **Technical level = "beginner":** Add more context, explain terms
 
+### Step 3.5: Pace Mode Selection (L3+ only; skip for L1/L2)
+
+Pace mode is **orthogonal to complexity level**. Level decides *which agents run*;
+pace decides *how visible the machinery is*. Any level can run in any mode.
+
+| Mode | Behavior | Best For |
+|------|----------|----------|
+| **guided** | Announce each phase. Run it. Pause. Wait for `/continue` (or any affirmative reply) before the next phase. | Demos, teaching, first-time users, high-stakes analyses where oversight matters |
+| **narrated** | Announce each phase, run it, announce the result, proceed immediately to the next phase. End-to-end but machinery is visible. | Normal use — the user wants to follow the reasoning but not block the flow |
+| **autopilot** | Silent end-to-end. No phase banners. Final output only. | Expert users, tight iteration loops, mid-analysis follow-ups |
+
+**Default when no signal is clear: `narrated`.** Never default to guided (blocks the
+user) or autopilot (hides the work). Narrated is the failure-safe middle ground.
+
+#### Auto-detection signals
+
+Score these from the user's message and session context. Highest score wins.
+Ties break to `narrated`.
+
+| Signal | guided | narrated | autopilot |
+|--------|:------:|:--------:|:---------:|
+| "walk me through", "teach me", "step by step", "explain as you go" | +3 | | |
+| "demo", "breakout", "show me how you", "I want to learn" | +3 | | |
+| Long-form prompt with framing/context (>80 words, multi-paragraph) | +1 | +1 | |
+| Terse task-like prompt ("conversion by device last week") | | | +2 |
+| User has already run ≥3 analyses in this session | | | +1 |
+| Profile `technical_level: beginner` | +1 | | |
+| Profile `technical_level: advanced` | | | +1 |
+| User previously invoked `/pace X` this session | (persisted — see below) | | |
+| `/run-pipeline` invocation without other signals | | +2 | |
+| Mid-analysis follow-up ("now break by country") | | | +2 |
+| "just run it", "silent", "don't narrate" | | | +3 |
+| "slow down", "one step at a time", "pause between" | +3 | | |
+
+#### Persisted mode (survives across phases and sessions)
+
+On every router run, read `working/session_state.yaml`. If `pace_mode` is set,
+use it as the starting mode **regardless of auto-detected signals** — an
+explicit user choice beats heuristics.
+
+The `/pace` skill writes this key. On session resume (`/resume-pipeline`), the
+persisted mode is honored.
+
+#### Override commands (honored at any time, including mid-phase)
+
+- `/pace guided` | `/pace narrated` | `/pace autopilot` — switch modes
+- `/continue` — in guided mode, proceed past the current pause point
+- `/skip {phase}` — skip the named upcoming phase (e.g., `/skip validation`)
+- `/explain` — during a guided pause, expand on the output of the phase that
+  just completed before continuing
+- `/abort` — stop the current analysis, discard in-progress work (preserve
+  `working/` artifacts for inspection)
+
 ### Step 4: Respond based on classification level
 
 **For L1-L2:** Execute immediately. No confirmation needed. Streamlined output:
@@ -210,22 +263,36 @@ If `.knowledge/user/profile.md` exists, read the user's preferences:
   Save that documentation for your own internal tracking — the user just wants
   the answer.
 
-**For L3-L5:** Brief the user on the plan BEFORE executing:
+**For L3-L5:** Brief the user on the plan AND the pace BEFORE executing:
 ```
-I'd classify this as a **[Level] — [Label]**. Here's my plan:
-1. [Step summary]
-2. [Step summary]
+I'd classify this as a **[Level] — [Label]**.
+
+**Pace: {mode}** ({one-line rationale — e.g., "detected teaching signals",
+"default for L3+", "persisted from earlier `/pace` command"})
+- guided → I'll pause after each phase and wait for `/continue`.
+- narrated → I'll announce each phase and run end-to-end.
+- autopilot → I'll run silently and show you the final deliverable.
+
+**Plan:**
+1. [Phase name] — [one-line purpose]
+2. [Phase name] — [one-line purpose]
 ...
-Estimated time: ~[X] minutes. Want me to proceed, or adjust the scope?
+
+Estimated time: ~[X] minutes.
+
+Reply to proceed, or:
+- `/pace {other_mode}` to change how I surface the work
+- Adjust the scope in your own words ("skip validation", "go deeper on X")
 ```
 
 Include any relevant pre-flight findings (dataset mismatch, corrections available,
 resolved entities) in this confirmation message.
 
 The user can:
-- **Confirm:** Proceed with the plan
+- **Confirm:** Proceed with the plan at the proposed pace
 - **Adjust up:** "Go deeper" → bump to next level
 - **Adjust down:** "Just give me the quick answer" → drop to lower level
+- **Change pace:** `/pace guided|narrated|autopilot` → re-brief with new pace
 
 ---
 
@@ -285,6 +352,66 @@ are not helpful.
   the highest-level one, note the others as follow-ups.
 - **Non-analytical requests:** "Help me write a SQL query" or "Explain this
   chart" — handle directly without classification.
+- **Guided-mode silence:** If the user doesn't reply after a guided pause
+  point, do NOT block indefinitely. Treat any next message (even a new
+  unrelated question) as implicit intent to move on. If the next message is a
+  new analytical question, re-route it — treat the paused one as abandoned
+  and preserve its `working/` artifacts untouched.
+- **Mode switch mid-phase:** `/pace X` takes effect at the **next phase
+  boundary**, never mid-phase. Tell the user which phase it applies from.
+- **Unknown `/pace` argument:** Echo the valid modes and ask which they want;
+  do not silently fall back.
+- **`working/session_state.yaml` write fails:** Honor the requested mode for
+  the current session in memory. Warn the user: "Pace set to X for this
+  session but I couldn't persist it — `/pace X` again after resume." Never
+  let a persistence failure block the analysis.
+
+---
+
+## Phase Banner Format
+
+Every time a skill or agent begins executing inside an L3+ analysis, emit a
+**phase banner** so the user can see the machinery. This is the entire point
+of narrated and guided modes.
+
+**Opening banner:**
+```
+▶ Phase {n}/{N}: {Skill or Agent Name}
+  Why: {one-line reason this phase is firing now}
+  Input: {brief summary — not a dump — of what's being fed in}
+```
+
+**Closing banner:**
+```
+✓ {Phase name} complete — {one-line result summary}
+```
+
+**In guided mode, append to the closing banner:**
+```
+  Reply to proceed, or: /explain (expand on this phase), /skip (skip next),
+  /pace {mode} (change pace), /abort (stop).
+```
+
+**On failure:**
+```
+✗ {Phase name} failed — {reason}.
+  Options: retry (reply "retry"), skip (reply "skip"), abort (/abort).
+```
+
+**Mode-specific rules:**
+
+| Mode | Opening banner | Work | Closing banner | Pause? |
+|------|:--------------:|:----:|:--------------:|:------:|
+| guided | ✓ | ✓ | ✓ + prompt | **yes** |
+| narrated | ✓ | ✓ | ✓ | no |
+| autopilot | — | ✓ | — | no |
+
+**Never in autopilot:** don't emit banners. Final deliverable only.
+
+**Never in guided or narrated:** don't skip banners. Silent execution in these
+modes is the specific failure that pace mode exists to prevent.
+
+---
 
 ---
 
@@ -300,6 +427,19 @@ are not helpful.
    the question is more complex than initially classified, pause and ask.
 5. **Never include classification overhead in L1/L2 output.** The user asked
    "how many orders?" — give them the number, not a 3-page classification report.
+6. **Never skip phase banners in guided or narrated mode.** Silent execution
+   in these modes is the specific failure pace mode exists to prevent. If you
+   catch yourself running a skill without announcing it first, stop and emit
+   the banner retroactively before proceeding.
+7. **Never block indefinitely in guided mode.** Pause points wait for one
+   user turn. If the next message is a new analytical question, re-route —
+   don't hold the old one open forever.
+8. **Never let pace persistence failure block analysis.** If
+   `working/session_state.yaml` can't be written, warn and continue in memory.
+   The analysis always proceeds; persistence is best-effort.
+9. **Never pick guided or autopilot as the default.** When auto-detection
+   signals are mixed or absent, always default to `narrated`. Guided blocks;
+   autopilot hides. Narrated is the only safe default.
 
 ---
 

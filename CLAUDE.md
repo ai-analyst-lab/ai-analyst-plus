@@ -31,8 +31,11 @@ Your style:
 3. **Full pipeline:** `/run-pipeline` — end-to-end from business question to validated slide deck.
 4. **Resume interrupted work:** `/resume-pipeline` — picks up where you left off.
 5. **Just a chart:** "Make a funnel chart of the checkout flow" — goes straight to Chart Maker.
+6. **Control the pace:** `/pace guided` — Claude announces each phase and pauses for `/continue` between steps (best for demos and learning). `/pace narrated` (default) announces phases but runs end-to-end. `/pace autopilot` runs silently with final output only.
 
 Claude will automatically apply quality checks, validate findings, and flag issues. You focus on the business question — Claude handles the analytical workflow.
+
+For any L3+ analysis, Claude opens with a plan that includes the detected **pace mode** and the phase-by-phase plan — you confirm or change pace before execution begins. Auto-detection picks `guided` from teaching signals ("walk me through"), `autopilot` from terse expert prompts, and defaults to `narrated` otherwise.
 
 ---
 
@@ -67,7 +70,7 @@ condition matches -- you do not need to be asked.
 |-------|------|------------|
 | Visualization Patterns | `.claude/skills/visualization-patterns/skill.md` | Generating any chart or visualization |
 | Presentation Themes | `.claude/skills/presentation-themes/skill.md` | Creating a deck or presentation |
-| Data Quality Check | `.claude/skills/data-quality-check/skill.md` | Connecting to a new data source or starting any analysis |
+| Data Quality Check | `.claude/skills/data-quality-check/skill.md` | Connecting to a new data source, starting any analysis, **or answering any question scoped to a specific table** (e.g., "tell me about X", "describe Y", "what's in Z") |
 | Question Framing | `.claude/skills/question-framing/skill.md` | Receiving a vague business question or starting a new analysis |
 | Metric Spec | `.claude/skills/metric-spec/skill.md` | Defining or documenting a metric |
 | Tracking Gaps | `.claude/skills/tracking-gaps/skill.md` | When an analysis requires data that may not exist |
@@ -81,8 +84,10 @@ condition matches -- you do not need to be asked.
 | Switch Dataset | `.claude/skills/switch-dataset/skill.md` | Invoked as `/switch-dataset {name}` — change the active dataset |
 | Datasets | `.claude/skills/datasets/skill.md` | Invoked as `/datasets` — list all connected datasets with status |
 | Data Inspect | `.claude/skills/data-inspect/skill.md` | Invoked as `/data` or `/data {table}` — show active dataset schema |
+| Data Map | `.claude/skills/data-map/skill.md` | Open-ended dataset-wide questions ("tell me about this data", "what's in here", "give me an overview") — cross-table health, relationships, date alignment, opening thread |
 | Knowledge Bootstrap | `.claude/skills/knowledge-bootstrap/skill.md` | Session start — load active dataset context, schema, quirks, and user profile |
-| Question Router | `.claude/skills/question-router/skill.md` | Every analytical request — classify L1-L5 and route to appropriate response path |
+| Question Router | `.claude/skills/question-router/skill.md` | Every analytical request — classify L1-L5, auto-detect pace mode, and route to the appropriate response path |
+| Pace | `.claude/skills/pace/skill.md` | Invoked as `/pace [guided\|narrated\|autopilot]` — change how visibly the analytical machinery surfaces. Orthogonal to L1-L5. Persists to `working/session_state.yaml`. |
 | First-Run Welcome | `.claude/skills/first-run-welcome/skill.md` | First session (no user profile) — adaptive onboarding based on available data |
 | Data Profiling | `.claude/skills/data-profiling/skill.md` | After connecting a new dataset — deep-profile schema, distributions, temporal patterns, completeness, anomalies |
 | Distribution Profiler | `.claude/skills/distribution-profiler/skill.md` | Profile a column's statistical distribution — identification, valid summary stats, recommended tests, A/B testing guidance, common traps |
@@ -372,6 +377,45 @@ These are non-negotiable. They protect analytical quality.
     with `--dataset`, `--agent`, `--purpose`, `--sql`, and `--result`. Applies
     inside AND outside the pipeline (`--agent ad-hoc` for one-off queries).
     The validation agent checks coverage and flags gaps.
+
+18. **Never answer a table-scoped question from schema alone.** Any question
+    that names a specific table ("tell me about X", "describe Y", "what's in
+    Z", "show me the W table") auto-invokes Data Quality Check alongside the
+    schema description. Minimum probe: row count, null rate per column (flag
+    >5%), date range on the primary timestamp, PK duplicate check, and surface
+    anything from `.knowledge/datasets/{active}/quirks.md` for that table.
+    Schema-only answers from `schema.md` are insufficient — they miss the
+    gotchas that determine whether the data is usable. If the table is large
+    enough that probing is expensive, say so and ask before running the full
+    probe, but always run the row count + PK duplicate check at minimum.
+
+19. **Never answer a dataset-wide open question from schema alone or with a
+    steering question.** Any question that references the dataset as a whole
+    — "tell me about this data / the data / this dataset", "what's in here",
+    "give me an overview / the map", "map out the data", "what do I have",
+    "what does this data look like", "show me what we've got" — auto-invokes
+    the Data Map skill (`.claude/skills/data-map/skill.md`). The required
+    deliverable is a cross-table health report: table inventory with row
+    counts and PK uniqueness, primary timestamp range per table, cross-table
+    date alignment, column completeness, a foreign-key join-rate matrix, a
+    relationship diagram, surfaced quirks, and one concrete opening thread.
+    Schema-only answers and read-and-steer responses ("what would you like
+    to explore?") are insufficient: dataset-wide open questions are the
+    curriculum payoff moment and must produce the broadest substantive
+    answer. Rule 18 covers table-scoped questions; Rule 19 covers
+    dataset-scoped questions. `/explore` read-and-steer behavior applies
+    only within an already-mapped dataset, never on first contact.
+
+20. **Never run an L3+ analysis silently in guided or narrated mode.** Every
+    skill and agent activation must emit a **phase banner** (opening + closing)
+    so the user can see the machinery. The banner format and mode rules live
+    in `.claude/skills/question-router/skill.md` → "Phase Banner Format". The
+    only mode where silent execution is correct is `autopilot`. If you catch
+    yourself running a phase without announcing it in guided/narrated mode,
+    stop and emit the banner retroactively before continuing. Pace mode is
+    auto-detected at routing time and can be overridden at any time with
+    `/pace guided|narrated|autopilot`. Default when detection is ambiguous:
+    `narrated` (never guided — that blocks; never autopilot — that hides).
 
 ---
 

@@ -46,21 +46,39 @@ patterns, and form hypotheses before committing to a formal analysis.
 
 ### Step 2: Choose Exploration Mode
 
-**Mode A: Dataset overview** (no table specified)
+**Mode A: Dataset overview** (no table specified) — **READ-AND-STEER**
 
-Goal: Give the user a mental map of what data exists and what questions they can answer.
+Goal: Give the user just enough orientation to steer, then **stop and ask** what they want to explore. Do NOT autopilot into observations, findings, or starting questions. The tool's job is to read the situation and hand the steering wheel back to the user.
 
-Deliver:
-1. **List all tables** with row counts and date ranges (if temporal data exists)
-2. **Highlight 3-5 most analytically useful tables** based on:
-   - Row count (more rows = more statistical power)
-   - Temporal coverage (wider date ranges enable trend analysis)
-   - Join potential (foreign keys connecting tables)
-3. **Show entity relationships** (e.g., customers → orders → products)
-4. **Suggest 3 starting questions** that are:
-   - Specific to this dataset (use actual table/column names)
-   - Answerable with available data
-   - Business-relevant (revenue, conversion, retention, segments)
+Deliver (keep it tight — this is a one-screen opener, not an analysis):
+1. **Dataset identity:** name, source/connection, coverage window.
+2. **Table list:** names with row counts. One-line format per table, no embellishment.
+3. **Entity map:** a short diagram of how the tables relate (e.g., `users → orders → order_items → products`).
+4. **Stop and ask.** End with an open question, e.g. _"What would you like to explore in {dataset}?"_
+
+**DO NOT** at this stage:
+- Run summary queries (status distributions, conversion rates, AOV, etc.).
+- Surface "what jumped out" observations, paradoxes, or quality flags.
+- Suggest 3 starting questions or propose investigations.
+- Save `working/explore_notes_*.md` — there is nothing to note yet.
+
+All of that comes **after** the user gives a real analytical question. Once they steer (e.g., "look at cancellations by device"), proceed with queries, charts, and notes — but narrate the invisible layers first (see Mode A → Follow-up below).
+
+**Mode A → Follow-up: User Steers With an Analytical Question** — **NARRATE THE MACHINERY**
+
+When the user answers the Mode A opener with a specific analytical question (e.g., "top 5 product categories by support ticket volume", "how does conversion vary by device"), DO NOT jump straight to SQL. The user is inside `/explore` to *see* the AI Analyst stack at work. Surface the invisible layers as four labeled, visible blocks — in this order, before presenting any numbers:
+
+1. **🧭 Question Router** — State the classification and routing decision out loud. Use the L1-L5 ladder (L1 factual lookup, L2 simple comparison/aggregation, L3 diagnostic, L4 root-cause, L5 strategic) and name the route (`data-retrieval`, `definition`, `troubleshooting`, `framing`, etc.). One or two sentences. Example: _"Classified as **L2 data retrieval** — a ranked aggregation over a known grain. Routing to query-and-return."_
+
+2. **🎯 Framed Query** — Translate the plain-English ask into a precise, executable spec before running it. 3-6 bullets covering: the grain (what's being counted), the joins required, the aggregation, how ambiguity is resolved (ties, duplicates, null keys, one-to-many fan-out), the ordering and limit. This is the "sharpening" step — the user can correct it before execution. Example: _"Grain: one row per support ticket. Join: `support_tickets → orders → order_items → products`. Count: distinct `ticket_id` per `products.category`. Ambiguity: an order can span multiple categories; a ticket is counted once per distinct category it touches (so percentages can sum >100%). Order by ticket count desc, limit 5."_
+
+3. **✅ Data Quality Check** — Run the checks the framed query depends on *before* the main aggregation, and report PASS / WARN / FAIL per check with actual numbers. Cover at minimum: (a) join-key coverage (what % of the left-side rows have a matching key?), (b) null rates on the columns used in GROUP BY / WHERE, (c) cardinality sanity (does any category look suspiciously large or small?). If a WARN would materially skew results (e.g., "60% of tickets have no `order_id`, so we're answering the question for the 40% that do"), surface it here — not in a footnote after the table.
+
+4. **📊 Answer** — Only after the three blocks above, run the query and present the result table with a one-line source citation. Include any methodology caveats that the Data Quality Check surfaced.
+
+**Keep each block tight** — 2-5 lines. The goal is visible machinery, not a wall of text. The student should be able to point at each block and say "that's the Router," "that's the framing layer," "that's the quality check."
+
+**Rationale:** Bare `/explore` is often used as a teaching surface for the AI Analyst architecture. Running queries silently hides the parts of the system that are most valuable to see. Narrating these three layers on every follow-up question inside `/explore` makes the copilot model legible.
 
 **Mode B: Table exploration** (table specified)
 
@@ -116,7 +134,7 @@ Avoid generic suggestions like "Want to analyze more?" — make them specific to
 
 ### Step 4: Save Exploration Notes (CRITICAL)
 
-After completing exploration, **always** write a summary file to `working/explore_notes_{YYYYMMDD}.md`.
+**Only after the user has steered with a real question and you've run actual exploration queries**, write a summary file to `working/explore_notes_{YYYYMMDD}.md`. Do NOT write this file on the initial read-and-steer prompt (Mode A opener) — there is nothing to note when the user hasn't asked anything yet.
 
 Include:
 - **Tables examined:** List with timestamps
@@ -146,7 +164,11 @@ Include:
 
 ## Rules
 
-1. **Keep it fast** — No more than 3-4 queries per exploration step. Users want speed, not exhaustive profiling.
+1. **Read-and-steer on open-ended `/explore`** — Bare `/explore` is an *invitation*, not an instruction. Orient the user (dataset name, source, coverage, table list, entity map) and then STOP and ask what they want to explore. Never autopilot into observations, summary queries, quality flags, or proposed investigations on the opener. Only run analytical queries after the user provides a specific question. `/explore {table}` and `/explore {table} {column}` already carry intent — go ahead with Mode B / Mode C there.
+
+2. **Narrate the stack on every follow-up inside `/explore`** — When the user steers with an analytical question after the Mode A opener, you MUST output the four labeled blocks (🧭 Question Router → 🎯 Framed Query → ✅ Data Quality Check → 📊 Answer) before presenting results. Do not run the aggregation and then retrofit the narration. These layers normally run silently across the system; inside `/explore` they are surfaced on purpose, because `/explore` is the teaching surface for the AI Analyst architecture. Skipping them defeats the point of using the command.
+
+3. **Keep it fast** — No more than 3-4 queries per exploration step. Users want speed, not exhaustive profiling.
 
 2. **Always apply `swd_style()`** if generating any chart. Call it BEFORE creating the chart.
 
