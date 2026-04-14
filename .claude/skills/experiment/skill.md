@@ -41,7 +41,11 @@ Invoke as `/experiment [mode]` or trigger on experiment-related intents:
 2. **SRM Gate (mandatory first step):**
    ```python
    from helpers.experiment_stats import srm_check
-   result = srm_check(observed_counts, expected_ratios)
+   # Positional lists ONLY — do not pass dicts.
+   # First arg: observed counts per variant (order must match expected_ratios).
+   # Second arg: expected allocation ratios, summing to 1.0.
+   result = srm_check([4218, 4196], [0.5, 0.5])
+   # result = {"chi2_stat": 0.058, "p_value": 0.81, "verdict": "PASS", ...}
    if result["verdict"] == "BLOCK":
        # HALT — do not proceed to treatment effect analysis
    ```

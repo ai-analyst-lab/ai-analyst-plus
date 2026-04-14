@@ -1,0 +1,98 @@
+{
+  "experiment_id": "checkout_redesign",
+  "analyzed_at": "2026-04-01",
+  "dataset": "data/novamart/experiments/checkout_redesign.csv",
+  "n_rows": 8414,
+
+  "step_0_load": {
+    "variants": {
+      "control": {"n": 4218, "completers": 641, "completion_rate": 0.1520},
+      "treatment": {"n": 4196, "completers": 705, "completion_rate": 0.1680}
+    },
+    "date_range": null,
+    "column_quality": "all expected columns present, no missing values in checkout_completed or revenue"
+  },
+
+  "step_1_srm": {
+    "observed_counts": [4218, 4196],
+    "expected_ratios": [0.5, 0.5],
+    "chi2_stat": 0.0575,
+    "p_value": 0.8105,
+    "verdict": "PASS",
+    "interpretation": "Randomization is healthy (p=0.81). Split is 50.13% / 49.87%. Safe to proceed to treatment-effect analysis."
+  },
+
+  "step_2_primary": {
+    "metric": "checkout_completion_rate",
+    "metric_type": "proportion",
+    "test": "two_proportion_z_test",
+    "control_rate": 0.1520,
+    "treatment_rate": 0.1680,
+    "absolute_diff": 0.0165,
+    "relative_lift": 0.1087,
+    "z_stat": 2.0080,
+    "p_value": 0.0446,
+    "ci_lower": 0.000386,
+    "ci_upper": 0.031713,
+    "alpha": 0.05,
+    "significant": true,
+    "interpretation": "Treatment rate (16.80%) is significantly higher than control (15.20%), diff = +1.65 pp (+10.9% relative), p = 0.0446. CI [+0.04 pp, +3.17 pp] excludes zero but barely — the lower bound is 0.04 pp, so the true effect could be much smaller than the point estimate."
+  },
+
+  "step_2_secondary": {
+    "aov_completers_only": {
+      "metric": "revenue",
+      "metric_type": "continuous",
+      "test": "welch_t_test",
+      "filter": "checkout_completed == 1",
+      "control_n": 641,
+      "treatment_n": 705,
+      "control_mean": 47.2008,
+      "treatment_mean": 45.7972,
+      "absolute_diff": -1.4036,
+      "relative_lift": -0.0297,
+      "t_stat": 1.3864,
+      "p_value_two_sided": 0.1658,
+      "ci_lower": -3.3894,
+      "ci_upper": 0.5822,
+      "cohens_d": -0.0754,
+      "significant": false,
+      "interpretation": "Control AOV ($47.20) is slightly higher than treatment ($45.80), diff = -$1.40 (-3.0% relative), but the two-sided Welch t-test p-value (0.166) is not significant. CI [-$3.39, +$0.58] straddles zero but is lopsided negative — the worst case is a $3.39 decline, which on a $47.20 baseline is -7.2%, violating the 3% guardrail set in the experiment design."
+    }
+  },
+
+  "step_3_guardrails": {
+    "average_order_value": {
+      "threshold_pct": -3.0,
+      "point_estimate_pct": -2.97,
+      "ci_lower_pct": -7.18,
+      "status": "AMBIGUOUS — point estimate within tolerance, CI lower bound violates threshold",
+      "interpretation": "Non-significant effect, but the CI lower bound (-7.2%) materially violates the 3% guardrail. This is a 'not significant does not mean safe' moment — if the worst case of the plausible range is an unacceptable outcome, that is a signal to investigate, not to ship."
+    },
+    "support_ticket_rate": {
+      "metric": "support_ticket_opened",
+      "metric_type": "proportion",
+      "test": "two_proportion_z_test",
+      "control_count": 218,
+      "control_n": 4218,
+      "control_rate": 0.0517,
+      "treatment_count": 231,
+      "treatment_n": 4196,
+      "treatment_rate": 0.0551,
+      "absolute_diff": 0.0034,
+      "relative_lift": 0.0652,
+      "threshold_pct": 10.0,
+      "z_stat": 0.688,
+      "p_value": 0.4918,
+      "significant": false,
+      "status": "PASS",
+      "interpretation": "Support ticket rate rose from 5.17% to 5.51% (+6.5% relative), non-significant (p=0.49). Below the 10% relative threshold from 4.9 — guardrail PASSES. The new checkout flow causes a small uptick in support contacts but within tolerance."
+    }
+  },
+
+  "step_4_ewl": {
+    "classification": "LEARN",
+    "reasoning": "Primary metric is significant (p=0.045, just at the edge) and support ticket guardrail passes (+6.5% below 10% threshold). But the AOV CI lower bound (-7.2%) materially violates the 3% AOV guardrail even though the test itself is non-significant. This is the 'not significant does not mean safe' case — the worst case of the plausible range is unacceptable.",
+    "recommendation": "LEARN, do not ship yet. Investigate AOV segments (device, platform, signup_days) to determine whether the -7.2% worst-case driver is concentrated in a single segment. If concentrated → ship to unaffected segments. If diffuse → extend experiment to tighten the AOV CI or abort."
+  }
+}

@@ -1,0 +1,92 @@
+# NovaMart Checkout Redesign — Week 4 Teaching Fixture
+#
+# Pre-registered config for the /experiment interpret demo used in
+# builders-course lesson 4.11b. Numbers pre-fill from power analysis on the
+# regenerated checkout_redesign.csv dataset; results section is populated by
+# running /experiment analyze checkout_redesign.
+
+experiment:
+  id: checkout_redesign
+  name: "Checkout flow simplification (5 steps → 3 steps)"
+  status: INTERPRETED
+
+  hypothesis:
+    action: "Simplify checkout flow from 5 steps to 3"
+    metric: "checkout_completion_rate"
+    direction: "increase"
+    magnitude: "10% relative lift (15.2% → 16.7%)"
+    mechanism: "Fewer form fields and a consolidated payment step reduce abandonment between cart and confirmation."
+
+  metrics:
+    primary:
+      name: checkout_completion_rate
+      type: proportion
+      definition: "Count of users with checkout_completed=1, divided by count of users with checkout_started=1, over the 2-week experiment window."
+      mde: 0.10                 # relative
+      baseline: 0.152
+      sql: "SELECT variant, SUM(checkout_completed) * 1.0 / SUM(checkout_started) AS rate FROM checkout_redesign GROUP BY variant"
+    secondary:
+      - name: average_order_value
+        type: continuous
+        definition: "Mean revenue across users with checkout_completed=1. AOV tracks the other half of revenue — we want higher completion without depressing basket size."
+    guardrail:
+      - name: average_order_value
+        type: continuous
+        threshold: -0.03        # do not drop more than 3% relative
+        direction: do_not_decrease
+        definition: "Mean revenue across completers must not fall more than 3% relative to control."
+      - name: support_ticket_rate
+        type: proportion
+        threshold: 0.10         # do not increase more than 10% relative
+        direction: do_not_increase
+        definition: "Fraction of users who open a support ticket within 24h of checkout attempt."
+
+  variants:
+    - name: control
+      allocation: 0.50
+      is_control: true
+    - name: treatment
+      allocation: 0.50
+      is_control: false
+
+  power:
+    alpha: 0.05
+    power: 0.80
+    test_type: "two-sided"
+    baseline_rate: 0.152
+    sample_size_per_group: 4207
+    total_sample_size: 8414
+    duration_days: 14
+    viable: VIABLE
+
+  decision_rules:
+    ship_if: "Primary metric significant positive (p < 0.05, CI lower bound > 0) AND no guardrail violations on AOV or support tickets."
+    do_not_ship_if: "Primary metric negative OR AOV drops > 3% (CI lower bound below -$1.42) OR support tickets up > 10%."
+    inconclusive_if: "Underpowered null on primary — extend experiment 1 week."
+    mixed_results: "Primary up but AOV CI lower bound violates guardrail — investigate with segment analysis before shipping."
+    emergency_stop: "Support ticket rate jumps > 20% in first 48 hours — halt and investigate."
+
+  data:
+    assignment_table: "data/novamart/experiments/checkout_redesign.csv"
+    outcome_table: "data/novamart/experiments/checkout_redesign.csv"
+    date_column: null
+    unit_column: user_id
+
+  timeline:
+    created: 2026-03-15
+    powered: 2026-03-16
+    started: 2026-03-18
+    analyzed: 2026-04-01
+    decided: 2026-04-02
+
+  results:
+    srm_verdict: PASS
+    primary_significant: true
+    primary_lift: 0.1057        # 10.57% relative (15.20% → 16.80%)
+    primary_p_value: 0.0446
+    primary_ci_lower: 0.000386  # absolute, in rate units
+    primary_ci_upper: 0.031713
+    guardrail_violations:
+      - "average_order_value: CI lower bound (-$3.39 on $47.20 baseline = -7.2%) violates 3% guardrail, though p=0.166 non-significant"
+    ewl_classification: LEARN
+    analysis_file: "experiments/checkout_redesign/analysis_results.json"

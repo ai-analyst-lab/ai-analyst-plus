@@ -12,7 +12,8 @@ Methods (ordered by causal credibility):
 
 Usage:
     from helpers.experiment_stats.causal import (
-        pre_post_analysis, did_basic, parallel_trends_test,
+        pre_post_analysis, pre_post_timeseries,
+        did_basic, parallel_trends_test,
         propensity_match, balance_table, love_plot,
         regression_adjust,
         rosenbaum_bounds, e_value,
@@ -20,7 +21,7 @@ Usage:
     )
 """
 
-from helpers.experiment_stats.causal.pre_post import pre_post_analysis
+from helpers.experiment_stats.causal.pre_post import pre_post_analysis, pre_post_timeseries
 from helpers.experiment_stats.causal.did import (
     did_basic,
     parallel_trends_test,
@@ -37,6 +38,7 @@ from helpers.experiment_stats.causal.assumptions import (
 
 __all__ = [
     "pre_post_analysis",
+    "pre_post_timeseries",
     "did_basic",
     "parallel_trends_test",
     "event_study",

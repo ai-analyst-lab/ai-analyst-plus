@@ -381,25 +381,47 @@ def generate_confounded():
 def generate_checkout_redesign():
     """Checkout redesign A/B test matching Week 4 lesson numbers exactly.
 
-    Lessons 4.10c and 4.19a reference specific baselines:
-    Control: 15.2% conversion, ~$47.20 AOV
-    Treatment: 16.8% conversion, ~$45.80 AOV (higher conversion, slightly lower AOV)
+    Lessons 4.10c, 4.11b, 4.19a reference specific baselines:
+    Control:   4218 users, 641 convert (15.2%), AOV ≈ $47.20, sd ≈ $18.40
+    Treatment: 4196 users, 705 convert (16.8%), AOV ≈ $45.80, sd ≈ $19.10
+
+    Also includes `support_ticket_opened` (binary): ~5% control baseline,
+    ~6% treatment (consistent with "new flow introduces some confusion" story
+    — non-significant guardrail degradation that lesson 4.11b teaches).
+
+    Deterministic completer counts + post-shift on revenue so sample means land
+    on lesson targets without Monte Carlo drift. Conversion z-test and AOV
+    Welch t-test both reproduce the lesson's claimed output.
     """
     rng = np.random.default_rng(110)
     n_control = 4218
     n_treatment = 4196
+    n_control_convert = 641   # 15.193% — rounds to 15.2%
+    n_treatment_convert = 705  # 16.802% — rounds to 16.8%
+    n_control_tickets = 218   # 5.17% — relative lift to treatment is +6.5%, below 10% guardrail
+    n_treatment_tickets = 231  # 5.51%
 
     users = []
     for i in range(n_control + n_treatment):
-        variant = "control" if i < n_control else "treatment"
-        conv_rate = 0.152 if variant == "control" else 0.168
-        converted = rng.binomial(1, conv_rate)
-        # AOV: control ~$47.20, treatment ~$45.80 (slightly lower)
+        if i < n_control:
+            variant = "control"
+            converted = 1 if i < n_control_convert else 0
+            # Deterministic ticket assignment, offset from converter indices so
+            # ticket-opening isn't perfectly correlated with checkout outcome.
+            support_ticket_opened = 1 if (i + 500) % n_control < n_control_tickets else 0
+            aov_mean, aov_sd = 47.20, 18.40
+        else:
+            variant = "treatment"
+            j = i - n_control
+            converted = 1 if j < n_treatment_convert else 0
+            support_ticket_opened = 1 if (j + 700) % n_treatment < n_treatment_tickets else 0
+            aov_mean, aov_sd = 45.80, 19.10
+
         if converted:
-            aov_mean = 47.20 if variant == "control" else 45.80
-            revenue = max(5.0, rng.normal(aov_mean, 18.0))
+            revenue = max(5.0, rng.normal(aov_mean, aov_sd))
         else:
             revenue = 0.0
+
         platform = rng.choice(["ios", "android", "web"], p=[0.40, 0.35, 0.25])
         signup_days = int(rng.exponential(120))
         users.append({
@@ -408,6 +430,7 @@ def generate_checkout_redesign():
             "checkout_started": 1,
             "checkout_completed": converted,
             "revenue": round(revenue, 2),
+            "support_ticket_opened": support_ticket_opened,
             "platform": platform,
             "signup_days": signup_days,
             "device_type": rng.choice(["mobile", "desktop", "tablet"],
@@ -415,6 +438,23 @@ def generate_checkout_redesign():
         })
 
     df = pd.DataFrame(users)
+
+    # Post-shift revenue so sample means land exactly on lesson targets.
+    # Preserves variance and distribution shape; removes Monte Carlo drift.
+    for variant, target_mean in [("control", 47.20), ("treatment", 45.80)]:
+        mask = (df["variant"] == variant) & (df["checkout_completed"] == 1)
+        current_mean = df.loc[mask, "revenue"].mean()
+        shift = target_mean - current_mean
+        df.loc[mask, "revenue"] = (df.loc[mask, "revenue"] + shift).round(2)
+
+    # Shuffle row order within each variant so converters aren't first-N.
+    # Keeps variant contiguous (matches existing CSV layout).
+    shuffled = []
+    for variant in ("control", "treatment"):
+        sub = df[df["variant"] == variant].sample(frac=1, random_state=rng.bit_generator).reset_index(drop=True)
+        shuffled.append(sub)
+    df = pd.concat(shuffled, ignore_index=True)
+    df["user_id"] = [f"u{i:06d}" for i in range(len(df))]
     save_dataset(df, "checkout_redesign", {
         "true_effect": "10.5% relative lift in checkout completion (15.2% → 16.8%)",
         "baseline_rate": 0.152,

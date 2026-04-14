@@ -116,6 +116,21 @@ def propensity_match(df, treat_col, covariates, outcome_col=None,
 
     n_matched = len(matched_treat_idx)
     n_unmatched = len(treated_df) - n_matched
+    attrition_pct = (n_unmatched / len(treated_df) * 100) if len(treated_df) > 0 else 0.0
+
+    # Attrition warning: PSM silently dropping a large share of treated units
+    # changes *who* the ATT describes. Flag it loudly for lesson use.
+    if attrition_pct > 30:
+        attrition_warning = (
+            f"HIGH ATTRITION: PSM dropped {n_unmatched}/{len(treated_df)} treated "
+            f"units ({attrition_pct:.1f}%) due to caliper={caliper}. The ATT now "
+            f"describes only the {n_matched} treated units that had a close control "
+            f"match, NOT the original treated population. Consider (a) relaxing the "
+            f"caliper, (b) using a different method (regression_adjust, DiD), or "
+            f"(c) reporting the ATT only for the sub-population with common support."
+        )
+    else:
+        attrition_warning = None
 
     # Build matched DataFrame
     matched_treat = df.loc[matched_treat_idx].copy()
@@ -130,6 +145,8 @@ def propensity_match(df, treat_col, covariates, outcome_col=None,
         "n_control": len(control_df),
         "n_matched": n_matched,
         "n_unmatched_treatment": n_unmatched,
+        "attrition_pct": round(attrition_pct, 2),
+        "attrition_warning": attrition_warning,
         "propensity_model_accuracy": accuracy,
         "caliper": caliper,
         "caliper_absolute": float(caliper_abs),

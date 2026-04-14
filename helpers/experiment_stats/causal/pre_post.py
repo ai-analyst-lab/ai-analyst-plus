@@ -119,3 +119,102 @@ def pre_post_analysis(pre, post, covariates=None, alpha=0.05):
         "confidence_level": "LOW",
         "interpretation": interp,
     }
+
+
+def pre_post_timeseries(df, date_col, outcome_col, post_col, covariates=None, alpha=0.05):
+    """Time-series pre-post analysis for daily/weekly aggregates.
+
+    Unlike `pre_post_analysis`, this is designed for time-series data where
+    each row is a time period (not a paired unit). Fits OLS with a post-
+    intervention indicator and optional covariates (e.g., day-of-week dummies
+    for seasonality control).
+
+    Args:
+        df: DataFrame with one row per time period.
+        date_col: column name for date/period (used for sorting only).
+        outcome_col: column name for the metric to analyze.
+        post_col: column name for the 0/1 post-intervention indicator.
+        covariates: list of column names to include as controls. String
+            columns are one-hot-encoded (drop_first=True). Numeric columns
+            are passed through. None for a simple pre-post with no controls.
+        alpha: significance level (default 0.05).
+
+    Returns:
+        dict with: estimate (effect of post), ci_lower, ci_upper, p_value,
+        significant, pre_mean, post_mean, relative_change_pct, method (always
+        "timeseries_ols"), covariates_used, n, alpha, caveat, confidence_level,
+        interpretation.
+    """
+    df = df.sort_values(date_col).reset_index(drop=True)
+
+    y = df[outcome_col].astype(float).values
+    post = df[post_col].astype(float).values
+
+    pre_mask = post == 0
+    post_mask = post == 1
+    if pre_mask.sum() < 2 or post_mask.sum() < 2:
+        return {
+            "error": "Need at least 2 pre and 2 post observations",
+            "interpretation": "Insufficient data for pre-post timeseries.",
+        }
+
+    X_parts = [pd.DataFrame({"post": post})]
+    covariates_used = []
+    if covariates:
+        for col in covariates:
+            if col not in df.columns:
+                return {
+                    "error": f"Covariate column not found: {col}",
+                    "interpretation": f"Column '{col}' not in dataframe.",
+                }
+            series = df[col]
+            if series.dtype == "object" or str(series.dtype).startswith("category"):
+                dummies = pd.get_dummies(series, prefix=col, drop_first=True).astype(float)
+                X_parts.append(dummies.reset_index(drop=True))
+                covariates_used.extend(dummies.columns.tolist())
+            else:
+                X_parts.append(series.astype(float).reset_index(drop=True).to_frame(col))
+                covariates_used.append(col)
+
+    X = sm.add_constant(pd.concat(X_parts, axis=1))
+    model = sm.OLS(y, X).fit()
+
+    estimate = float(model.params["post"])
+    ci = model.conf_int(alpha=alpha).loc["post"]
+    ci_lower, ci_upper = float(ci[0]), float(ci[1])
+    p_value = float(model.pvalues["post"])
+    significant = bool(p_value < alpha)
+
+    pre_mean = float(y[pre_mask].mean())
+    post_mean = float(y[post_mask].mean())
+    rel_change = estimate / abs(pre_mean) * 100 if pre_mean != 0 else float("inf")
+
+    sig_label = "significant" if significant else "not significant"
+    cov_label = f" (controlling for {', '.join(covariates)})" if covariates else ""
+    interp = (
+        f"Pre-post timeseries change{cov_label}: {estimate:+.4f} "
+        f"({rel_change:+.1f}%), p = {p_value:.4f} ({sig_label}). "
+        f"Pre-mean = {pre_mean:.4f}, post-mean = {post_mean:.4f}. "
+        f"95% CI: [{ci_lower:+.4f}, {ci_upper:+.4f}]. "
+        f"Method: timeseries_ols. {CAVEAT}"
+    )
+
+    return {
+        "estimate": estimate,
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "p_value": p_value,
+        "significant": significant,
+        "pre_mean": pre_mean,
+        "post_mean": post_mean,
+        "relative_change_pct": float(rel_change),
+        "method": "timeseries_ols",
+        "covariates_used": covariates_used,
+        "n": int(len(df)),
+        "n_pre": int(pre_mask.sum()),
+        "n_post": int(post_mask.sum()),
+        "alpha": alpha,
+        "caveat": CAVEAT,
+        "confidence_level": "LOW",
+        "interpretation": interp,
+    }
