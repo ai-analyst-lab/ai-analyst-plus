@@ -2,11 +2,100 @@
 past this threshold, extract the agent table to agents/INDEX.md and the
 rules section to RULES.md, referenced from here. -->
 
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # CLAUDE.md -- AI Analyst Plus
 
 This file tells Claude Code how to behave in this repo. It turns Claude Code
 from a general-purpose assistant into an AI Product Analyst. Every section
 matters -- read it, modify it, make it yours.
+
+---
+
+## Development
+
+### Environment Setup
+```bash
+bash scripts/setup.sh          # Create .venv and install dependencies
+pip install -e ".[dev]"        # Install with dev extras (pytest, faker)
+pip install -r requirements.txt  # Full dependency list including warehouse connectors
+```
+
+Python 3.10+ required. Anaconda Python lives at `C:/Users/dhira/anaconda3/python.exe` on this machine; use `/c/Users/dhira/.local/bin/uvx.exe --with pandas python@3.11` as a fallback runner when the Anaconda numpy DLLs fail.
+
+### Running Tests
+```bash
+pytest                              # All tests
+pytest tests/test_chart_palette.py  # Single file
+pytest -m "not slow"                # Skip slow tests
+pytest -m integration               # Integration tests only
+pytest --tb=short -q                # Quiet mode
+```
+
+### Linting & Quality Scripts
+```bash
+python scripts/lint_chart_colors.py   # Flag color conflicts across themes
+python scripts/lint_wcag.py           # WCAG contrast checks on palette
+python scripts/check_imports.py       # Verify helper imports are clean
+python scripts/check_theme_sync.py    # Validate theme CSS ↔ _base.yaml sync
+```
+
+### Query Logging (required after every SQL execution)
+```bash
+python3 scripts/log_query.py \
+  --dataset <dataset-id> --agent <agent-name> \
+  --purpose "describe the query" \
+  --sql "SELECT ..." --result "N rows, summary"
+```
+Use `--agent ad-hoc` for one-off queries outside the pipeline.
+
+---
+
+## Codebase Architecture
+
+### Three-layer system
+```
+Skills (.claude/skills/)   — Standards applied automatically (chart style, validation, framing)
+Agents (agents/)           — Multi-step workflows executed on demand (analysis → deck)
+Helpers (helpers/)         — Python modules called by agents for computation
+```
+Skills are always active. Agents are invoked explicitly. Helpers are imported by Python scripts agents generate.
+
+### Key helper groups
+| Group | Key files | Purpose |
+|-------|-----------|---------|
+| Charts | `chart_helpers.py`, `chart_palette.py`, `chart_style_guide.md` | SWD-style charts — always call `swd_style()` first |
+| Data access | `data_helpers.py`, `connection_manager.py` | Source detection, multi-warehouse connections |
+| SQL | `sql_helpers.py`, `sql_dialect.py`, `dialects/` | Sanity checks + warehouse-specific SQL adapters |
+| Validation | `structural_validator.py`, `logical_validator.py`, `business_rules.py`, `simpsons_paradox.py`, `confidence_scoring.py` | 4-layer validation pipeline (run in order, halt on BLOCKER) |
+| Experiment stats | `experiment_stats/` | A/B tests, power, SRM, Bayesian, causal — always use these, never inline scipy |
+| Export | `gdoc_builder.py`, `gdoc_narrative_parser.py`, `marp_export.py` | Doc/deck generation |
+| Provenance | `cross_verification.py`, `provenance_assembler.py`, `query_log.py` | Audit trail for every finding |
+
+### Persistent knowledge (`.knowledge/`)
+```
+active.yaml                        — Which dataset is active
+datasets/{id}/manifest.yaml        — Connection details, row counts, date range
+datasets/{id}/schema.md            — Table/column docs
+datasets/{id}/quirks.md            — Dataset-specific gotchas
+corrections/index.yaml             — Logged SQL mistakes (check before writing SQL)
+query-archaeology/curated/         — Proven SQL patterns for reuse
+analyses/                          — Archived analysis outputs
+```
+
+### File output conventions
+- Intermediate work → `working/`
+- Final deliverables (charts, decks, narratives) → `outputs/`
+- Per-run pipeline artifacts → `outputs/{RUN_ID}/`
+- Query logs → `working/query_log_{dataset}_{date}.jsonl`
+
+### Theme system
+Marp decks use themes in `themes/`. Default: `analytics` (light). Dark variant: `analytics-dark` (use for workshops/talks). Theme variables come from `themes/_base.yaml`; `theme_loader.py` and `chart_palette.py` consume them. Never hardcode hex colors — use palette functions.
+
+### Deprecated
+`helpers/tieout_helpers.py` is a shim — use `cross_verification.py` and `data_quality_extras.py` directly.
 
 ---
 

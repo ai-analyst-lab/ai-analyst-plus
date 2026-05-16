@@ -763,3 +763,105 @@ agents:
     outputs:
       - reports/causal_report_{{DATE}}.md
     knowledge_context: []
+
+  # ── PM / Data Product Build Team ──────────────────────────────────
+
+  - name: pm-orchestrator
+    file: agents/pm-orchestrator.md
+    pipeline_step: null
+    critical: true
+    depends_on: []
+    inputs:
+      - PRODUCT_IDEA
+      - TARGET_USERS
+      - SUCCESS_METRIC
+    outputs:
+      - working/prd_{{DATE}}.md
+      - outputs/product_build_plan_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/active.yaml
+      - .knowledge/datasets/{active}/schema.md
+
+  - name: pm-designer
+    file: agents/pm-designer.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - pm-orchestrator
+    inputs:
+      - PRD
+      - PRODUCT_IDEA
+    outputs:
+      - working/design_spec_{{DATE}}.md
+    knowledge_context: []
+
+  - name: pm-data-analyst
+    file: agents/pm-data-analyst.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - pm-orchestrator
+    inputs:
+      - PRD
+      - ACTIVE_DATASET
+    outputs:
+      - working/data_model_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/schema.md
+      - .knowledge/datasets/{active}/quirks.md
+
+  - name: pm-backend-dev
+    file: agents/pm-backend-dev.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - pm-data-analyst
+    inputs:
+      - PRD
+      - DATA_MODEL
+    outputs:
+      - working/backend_spec_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/manifest.yaml
+
+  - name: pm-frontend-dev
+    file: agents/pm-frontend-dev.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - pm-designer
+    inputs:
+      - PRD
+      - DESIGN_SPEC
+    outputs:
+      - working/frontend_spec_{{DATE}}.md
+    knowledge_context: []
+
+  - name: pm-qa-engineer
+    file: agents/pm-qa-engineer.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - pm-backend-dev
+      - pm-frontend-dev
+    inputs:
+      - PRD
+      - BACKEND_SPEC
+      - FRONTEND_SPEC
+    outputs:
+      - working/qa_test_plan_{{DATE}}.md
+    knowledge_context: []
+
+  - name: pm-devops
+    file: agents/pm-devops.md
+    pipeline_step: null
+    critical: true
+    depends_on:
+      - pm-backend-dev
+    inputs:
+      - PRD
+      - BACKEND_SPEC
+    outputs:
+      - working/devops_spec_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/manifest.yaml

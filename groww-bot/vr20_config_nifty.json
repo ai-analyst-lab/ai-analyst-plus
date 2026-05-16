@@ -1,0 +1,14 @@
+{
+  "stop_pct_cap": 0.50,
+  "target_or_buckets": {"lt80": 0.35, "lt130": 0.55, "lt200": 0.75},
+  "min_rr": 1.5,
+  "be_trigger": 1.25,
+  "conviction_lots": {"80": 3, "60": 2, "40": 1},
+  "pe_active": true,
+  "ce_active": true,
+  "hi_q_min_wr": 0.70,
+  "pe_hq_boosters": ["orb_up", "gap_bull", "is_friday", "is_expiry"],
+  "ce_hq_boosters": ["gap_bull", "is_friday", "orb_up", "prev_bull"],
+  "regime_score": 0.0,
+  "regime_bias": "NEUTRAL"
+}
