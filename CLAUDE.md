@@ -157,6 +157,7 @@ condition matches -- you do not need to be asked.
 
 | Skill | Path | Apply When |
 |-------|------|------------|
+| Reliability | `.claude/skills/reliability/SKILL.md` | Invoked as `/reliability "<question>" [N]` — run the same question N independent times (default 5) and report STABLE vs DRIFT. The cheapest eval; needs no answer key (measures stability, not correctness). Calls `helpers/reliability_stats.py`; audit trail in `.knowledge/reliability/` |
 | Visualization Patterns | `.claude/skills/visualization-patterns/skill.md` | Generating any chart or visualization |
 | Presentation Themes | `.claude/skills/presentation-themes/skill.md` | Creating a deck or presentation |
 | Theme Picker | `.claude/skills/theme-picker/skill.md` | Interactive chart request with no theme decided — offer the theme menu. Skip when a theme is named, a session default is set, or the chart is inside a pipeline run |

@@ -63,10 +63,3 @@
 | Causal Sensitivity | `agents/causal-sensitivity.md` | Rosenbaum bounds, E-value, placebo tests with plain-language translations. Called by `/causal sensitivity`. |
 | Causal Interpreter | `agents/causal-interpreter.md` | Places estimate on the confidence ladder and synthesizes verdicts. Called by `/causal report`. |
 | Causal Report Generator | `agents/causal-report-generator.md` | Full report with mandatory caveats per method (non-negotiable). Called by `/causal report`. |
-| **PM Orchestrator** | `agents/pm-orchestrator.md` | Product Manager that owns the full data product build: writes PRD, coordinates all 6 sub-agents, synthesizes the Product Build Plan. Invoked by `/build-data-product`. |
-| PM Designer | `agents/pm-designer.md` | UX/UI Designer sub-agent: information architecture, screen wireframe specs, component inventory, visualization standards. Called by pm-orchestrator. |
-| PM Data Analyst | `agents/pm-data-analyst.md` | Data Analyst sub-agent: data availability audit, metric definitions, pipeline architecture, core SQL queries, data quality gates. Called by pm-orchestrator. |
-| PM Backend Dev | `agents/pm-backend-dev.md` | Backend Developer sub-agent: stack recommendation, REST API design, project structure, pipeline scheduler, security checklist. Called by pm-orchestrator. |
-| PM Frontend Dev | `agents/pm-frontend-dev.md` | Frontend Developer sub-agent: component architecture, React Query hooks, filter state design, empty states, performance budget. Called by pm-orchestrator. |
-| PM QA Engineer | `agents/pm-qa-engineer.md` | QA Engineer sub-agent: acceptance criteria, data accuracy tests, API test cases, E2E flows, sign-off checklist. Called by pm-orchestrator. |
-| PM DevOps | `agents/pm-devops.md` | DevOps Engineer sub-agent: infrastructure design, CI/CD pipeline, environment config, monitoring setup, operational runbook. Called by pm-orchestrator. |
