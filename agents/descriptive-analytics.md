@@ -252,7 +252,9 @@ This check typically takes 2-3 queries and adds significant analytical credibili
 Identify drop-off points and conversion rates through key user journeys.
 
 **4a. Define the Funnel**
-Based on the question/hypothesis, define the funnel steps:
+First, check for a canonical funnel definition at `.knowledge/datasets/{active}/funnels.md`. If it exists, use those steps and measurement method — do not rediscover or reorder them.
+
+If no `funnels.md` exists, define the funnel steps:
 - If the hypothesis specifies a funnel, use those steps
 - If not, identify the natural user journey from the data (e.g., visit -> signup -> activation -> first value -> retention)
 - Each step must map to a specific event or condition in the data
