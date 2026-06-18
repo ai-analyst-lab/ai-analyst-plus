@@ -91,6 +91,13 @@ skills, not restate them — single source of truth per format (same pattern as 
 
 **Risk/Effort:** Low / S. No behavior change — just stop restating procedures in two places.
 
+> **REASSESSED ON EXECUTION (2026-06-18):** the hunter over-flagged this. `export`'s notion path is
+> *already* a thin delegator ("Follows the Notion Export skill" → "Invoke the notion-export agent"),
+> and its gdoc path is a *distinct method* (build local `.docx` via `gdoc_builder` → upload with
+> `convert_to_google_doc=True`), NOT a restatement of `google-doc-export`'s native-MCP construction.
+> No real prose duplication to remove. Only change made: a formatting source-of-truth cross-reference
+> on the gdoc path so both Doc-builders share `google-doc-export`'s look. **#1 effectively closed.**
+
 ---
 
 ## Recommendation & sequence

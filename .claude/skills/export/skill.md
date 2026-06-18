@@ -89,6 +89,12 @@ Creates a formatted Google Doc from the analysis with embedded charts, styled
 headings, internal bookmark links, and SQL code blocks. Follows the Analysis
 Readout template: Summary (30-second read) → Analysis (30-minute read) → Resources.
 
+> **Formatting source of truth:** the `google-doc-export` skill owns Doc formatting
+> standards (heading hierarchy, image placement, spacing). This path produces that same
+> look by building a local `.docx` (via `gdoc_builder`) and uploading with
+> `convert_to_google_doc=True` — a distinct method from native MCP construction, not a
+> restatement of it.
+
 #### Step 0: Auth Check
 
 Check if `mcp__google-docs__*` tools are accessible:
