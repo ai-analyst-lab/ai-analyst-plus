@@ -135,7 +135,7 @@ ORDER BY 1;
 Use the helper functions for systematic outlier and null concentration checks:
 
 ```python
-from helpers.tieout_helpers import check_null_concentration, check_outliers
+from helpers.data_quality_extras import check_null_concentration, check_outliers
 
 # Null concentration — flags columns with high null rates
 null_results = check_null_concentration(df)

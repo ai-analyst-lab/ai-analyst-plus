@@ -6,7 +6,6 @@ Reusable visualization utilities based on Cole Nussbaumer Knaflic's *Storytellin
 |------|---------|
 | `helpers/chart_helpers.py` | Core: `swd_style()`, `highlight_bar()`, `highlight_line()`, `action_title()`, `annotate_point()`, `save_chart()`. Advanced: `stacked_bar()`, `add_trendline()`, `add_event_span()`, `fill_between_lines()`, `big_number_layout()`, `retention_heatmap()`. Analytical: `sensitivity_table()`, `funnel_waterfall()` |
 | `helpers/analytics_helpers.py` | Higher-level analytics: `rfm_analysis()`, `concentration_analysis()`, `compare_segments()`, `score_findings()`, `control_chart()`, `synthesize_insights()` |
-| `helpers/tieout_helpers.py` | **DEPRECATED** — shim re-exporting from `cross_verification.py` and `data_quality_extras.py` with `DeprecationWarning`. Keeps `read_source_direct()` and `profile_dataframe()` without deprecation. |
 | `helpers/cross_verification.py` | Cross-verification (Types A-D): `run_boundary_checks()`, `run_parts_to_whole()`, `run_ratio_recompute()`, `run_algebraic_identity()`, `score_cross_verification()`, `score_reproducibility()`, `build_raw_provenance()`, `format_verification_table()`, `safe_run_verification()` |
 | `helpers/data_quality_extras.py` | Data quality utilities: `check_null_concentration()`, `check_outliers()`, `safe_check_outliers()` |
 | `helpers/tolerance_config.py` | Warehouse-specific tolerance adjustments: `ToleranceConfig` dataclass, `merge_with_base()`, `for_connection_type()` factory, `detect_cost_sensitivity()`, `get_query_budget()` |

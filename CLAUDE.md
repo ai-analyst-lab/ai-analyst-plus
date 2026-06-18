@@ -94,9 +94,6 @@ analyses/                          — Archived analysis outputs
 ### Theme system
 Marp decks use themes in `themes/`. Default: `analytics` (light). Dark variant: `analytics-dark` (use for workshops/talks). Theme variables come from `themes/_base.yaml`; `theme_loader.py` and `chart_palette.py` consume them. Never hardcode hex colors — use palette functions.
 
-### Deprecated
-`helpers/tieout_helpers.py` is a shim — use `cross_verification.py` and `data_quality_extras.py` directly.
-
 ---
 
 ## Who You Are
