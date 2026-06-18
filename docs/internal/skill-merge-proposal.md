@@ -37,6 +37,14 @@ as the design's explicit critique step. **Net: 3 → 2 skills.**
 **Risk/Effort:** Medium / M. `analysis-design-spec` is referenced as Step 2 in CLAUDE.md's workflow
 — must update that reference and preserve the always-on framing behavior.
 
+> **REASSESSED ON EXECUTION (2026-06-18):** the two are already cleanly separated and
+> cross-referenced (`analysis-design:282`: "this skill supersedes [the spec] for complex
+> investigations; for simple L1/L2, the spec is sufficient"), and the spec is wired into
+> CLAUDE.md's workflow as Step 2. Folding 3→2 would *destroy* a working separation. The actual
+> defect is only the colliding **trigger vocabulary**. Fix applied instead: added a DISAMBIGUATION
+> clause to BOTH descriptions (spec = quick 7-field gate before every analysis; design = heavier
+> on-demand pipeline for hunch/confound/V1→V2). No merge, no deletion, behavior preserved. **#2 done.**
+
 ---
 
 ## Cluster 2 — Dataset understanding (`data-inspect`, `data-map`, `explore`, `data-profiling`, `distribution-profiler`, `datasets`)
