@@ -138,32 +138,6 @@ def test_tracking_gaps_exists():
 
 
 # ---------------------------------------------------------------------------
-# Fixture 8: /first-run-welcome three-pillar intro
-# ---------------------------------------------------------------------------
-
-
-def test_first_run_welcome_mentions_north_star():
-    """W4.2 added /north-star to cold-start three-pillar intro AND warm-start
-    quick actions. Regression: verify BOTH sections specifically — counting
-    total mentions doesn't catch "added to cold-start, dropped from warm-start"."""
-    frw_skill = REPO_ROOT / ".claude/skills/first-run-welcome/skill.md"
-    assert frw_skill.is_file()
-    content = frw_skill.read_text()
-
-    # Split on the section markers in first-run-welcome
-    cold_start_idx = content.find("Cold Start")
-    warm_start_idx = content.find("Warm Start")
-    assert cold_start_idx > 0, "Cold Start section missing"
-    assert warm_start_idx > cold_start_idx, "Warm Start section missing or before Cold Start"
-
-    cold_section = content[cold_start_idx:warm_start_idx]
-    warm_section = content[warm_start_idx:]
-
-    assert "/north-star" in cold_section, "/north-star not in Cold Start three-pillar intro"
-    assert "/north-star" in warm_section, "/north-star not in Warm Start quick actions"
-
-
-# ---------------------------------------------------------------------------
 # Cross-cutting: /question-router NSM intent registration
 # ---------------------------------------------------------------------------
 

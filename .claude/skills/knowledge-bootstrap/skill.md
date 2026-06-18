@@ -200,11 +200,3 @@ _Records of times the user corrected the system's assumptions._
 3. **Never modify manifest during bootstrap.** Bootstrap is read-only.
 4. **Never dump raw YAML to the user.** Show the brief status, not the load.
 5. **Never block on a missing subsystem.** Graceful degradation always.
-
-## Relationship with Other Skills
-
-**first-run-welcome:** This skill (knowledge-bootstrap) loads technical context (datasets, corrections, learnings, archaeology). The first-run-welcome skill handles user onboarding UX (welcome messaging, setup flow guidance, role detection). Both may run at session start, but they serve different purposes:
-- **knowledge-bootstrap** → "What data and context do I have?"
-- **first-run-welcome** → "What should I say to welcome this user?"
-
-Use knowledge-bootstrap first to load context, then first-run-welcome can use that context to tailor the welcome message.

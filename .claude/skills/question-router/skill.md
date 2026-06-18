@@ -227,7 +227,7 @@ Ties break to `narrated`.
 | Signal | guided | narrated | autopilot |
 |--------|:------:|:--------:|:---------:|
 | "walk me through", "teach me", "step by step", "explain as you go" | +3 | | |
-| "demo", "breakout", "show me how you", "I want to learn" | +3 | | |
+| "show me how you", "I want to learn" | +3 | | |
 | Long-form prompt with framing/context (>80 words, multi-paragraph) | +1 | +1 | |
 | Terse task-like prompt ("conversion by device last week") | | | +2 |
 | User has already run ≥3 analyses in this session | | | +1 |

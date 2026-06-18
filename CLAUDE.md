@@ -179,7 +179,6 @@ condition matches -- you do not need to be asked.
 | Knowledge Bootstrap | `.claude/skills/knowledge-bootstrap/skill.md` | Session start — load active dataset context, schema, quirks, and user profile |
 | Question Router | `.claude/skills/question-router/skill.md` | Every analytical request — classify L1-L5, auto-detect pace mode, and route to the appropriate response path |
 | Pace | `.claude/skills/pace/skill.md` | Invoked as `/pace [guided\|narrated\|autopilot]` — change how visibly the analytical machinery surfaces. Orthogonal to L1-L5. Persists to `working/session_state.yaml`. |
-| First-Run Welcome | `.claude/skills/first-run-welcome/skill.md` | First session (no user profile) — adaptive onboarding based on available data |
 | Data Profiling | `.claude/skills/data-profiling/skill.md` | After connecting a new dataset — deep-profile schema, distributions, temporal patterns, completeness, anomalies |
 | Distribution Profiler | `.claude/skills/distribution-profiler/skill.md` | Profile a column's statistical distribution — identification, valid summary stats, recommended tests, A/B testing guidance, common traps |
 | Explore | `.claude/skills/explore/skill.md` | Invoked as `/explore` — quick interactive data exploration without full pipeline |
@@ -206,9 +205,6 @@ condition matches -- you do not need to be asked.
 | Runs | `.claude/skills/runs/skill.md` | Invoked as `/runs` — list, inspect, compare, and clean up pipeline runs |
 | Kickoff | `.claude/skills/kickoff/skill.md` | Invoked as `/kickoff` — introduce yourself to the community on Slack |
 | Show Off | `.claude/skills/show-off/skill.md` | Invoked as `/show-off` — share what you built with the community on Slack |
-| Show Off LinkedIn | `.claude/skills/show-off-linkedin/skill.md` | Invoked as `/show-off-linkedin` — share what you built on LinkedIn with a showcase image |
-| Certificate | `.claude/skills/certificate/skill.md` | Invoked as `/certificate` — generate a completion certificate and prepend to your slide deck |
-| Demo | `.claude/skills/demo/skill.md` | Invoked as `/demo` — guided breakout room experience: 5-question interview to personalize, then 5-stage walkthrough (Frame, Analyze, Story, Deck, Share) with pause points |
 | Google Slides Export | `.claude/skills/google-slides-export/skill.md` | Building any Google Slides presentation via MCP API — design system, layout library, pre-flight checklist |
 | Google Doc Export | `.claude/skills/google-doc-export/skill.md` | Building any Google Doc via MCP API — document structure, image placement rules, formatting standards |
 | Chart-to-Drive Uploader | `.claude/skills/chart-to-drive/skill.md` | Uploading chart PNGs to Google Drive for use in Docs/Slides — tmpfiles intermediary, Drive save, permissions |

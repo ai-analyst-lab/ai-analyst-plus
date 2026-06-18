@@ -100,7 +100,6 @@ def _default_config():
         },
         "presentations": {
             "default_theme": "analytics",
-            "auto_certificate": False,
         },
         "dev_mode": False,
     }
@@ -318,16 +317,6 @@ def get_default_presentation_theme():
     """
     config = get_config()
     return config.get("presentations", {}).get("default_theme", "analytics")
-
-
-def should_auto_certificate():
-    """Check if completion certificates should be auto-added to decks.
-
-    Returns:
-        bool: True if auto-certificate is enabled
-    """
-    config = get_config()
-    return config.get("presentations", {}).get("auto_certificate", False)
 
 
 # ---------------------------------------------------------------------------

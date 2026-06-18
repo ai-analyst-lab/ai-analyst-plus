@@ -199,7 +199,6 @@ Next: try /north-star audit with the suggested reframe.
 | `/pace` | Read `working/session_state.yaml::pace_mode` and honor guided/narrated/autopilot |
 | `/knowledge-bootstrap` | Profile loaded during session-start bootstrap |
 | `/session-handoff` | After 15+ tool calls or before context limits, persist NSM context |
-| `/first-run-welcome` | /north-star included in three-pillar intro (W4.2) |
 | `/datasets` | Surfaces active NSM at top of dataset summary (W4.3) |
 
 ---

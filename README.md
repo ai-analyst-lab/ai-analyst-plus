@@ -195,8 +195,6 @@ If the pipeline gets interrupted, resume where you left off:
 | `/experiment-brief` | Generate a structured A/B test brief |
 | `/kickoff` | Introduce yourself to the community on Slack |
 | `/show-off` | Share what you built with the community |
-| `/show-off-linkedin` | Generate a LinkedIn-ready architecture diagram |
-| `/certificate` | Generate a completion certificate |
 
 Or just ask in plain English. "Show me conversion by device" works as well as any command.
 
