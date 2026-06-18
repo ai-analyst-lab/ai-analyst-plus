@@ -68,9 +68,14 @@ always-compare · color-commentary · drop-off-format · skeptical-reviewer · g
 - `tests/north_star/test_input_tree.py` — comments de-NovaMart'd (data unchanged; 7 tests pass)
 - Guard already in place: `tests/test_data_helpers_v2.py::test_no_novamart_references` (keep)
 
-### B3. Remaining — config & template
-- [ ] `data_sources.yaml` — currently registers `novamart`. **Plan:** gitignore it + ship `data_sources.example.yaml` (mirror the `active.yaml` pattern). Do NOT wipe in place — Shane's local demo reads it.
-- [ ] **Build a generic dataset-brain template** `.knowledge/datasets/_template/` (placeholder `schema.md`, `quirks.md`, `manifest.yaml`, `metrics/index.yaml`) so `/connect-data` scaffolds from it. `_metric_schema.yaml` already exists as the metric template.
+### B3. Config & template — done ✅
+- `data_sources.yaml` — emptied to a clean registry template (no NovaMart). No gitignore
+  needed: no Python reads it, skills treat it as optional (scan `.knowledge/datasets/`
+  when empty), and the dataset manifest is the source of truth — so the local NovaMart
+  still resolves via its (gitignored) manifest.
+- Template story already covered: `connection_templates/*.yaml.example` (4 warehouses) +
+  `_metric_schema.yaml` + connect-data generating the brain. A separate `_template/` brain
+  would be redundant (counter to dedup goal) — skipped.
 
 ### B4. `/north-star drivers` — DECIDED: de-hardcode, real-world default ✅ (partial)
 Principle (Shane): everything defaults to real-world behavior, nothing hardcoded.
@@ -94,28 +99,35 @@ Remaining (flagged, not yet done):
 - [ ] OPEN: remaining sample data — `data/examples/` and `data/experiments/_answers/` (12 keys).
   Pull these into the same future sample-data repo, or keep `data/examples/` as bundled demos?
 
-### B6. Theme
-- [ ] Fix `themes/brands/economist/` WCAG failures + rewrite copy-paste README, or drop it
+### B6. Theme — done ✅
+`themes/brands/economist/` darkened teal/gold/captions + distinct alert → all WCAG gates
+green (`check_theme economist`); copy-paste "Acme Corp" README rewritten.
 
 ---
 
-## Phase C — Open-source hardening & secret scan  *(moved up per Shane)*
-
-- ✅ `.env` gitignored & untracked; no secret files tracked; `.gitleaks.toml` + pre-commit present
-- [ ] Run `gitleaks` over **full history** (bot era) — guarantee no secrets anywhere in history
-- [ ] Audit `data_sources.yaml`, `snowflake-mcp-config.yaml`, `connection_templates/` — placeholders only, no real creds
-- [ ] README / LICENSE pass; `pyproject.toml` metadata; CI green on a clean clone
+## Phase C — Open-source hardening & secret scan — done ✅
+Full report: `docs/internal/hardening-report.md`. **Secret-scan verdict: GO** — no real
+secrets in the working tree or across all 64 commits of history; groww-bot era is clean
+(creds by reference only); `.env` never tracked / absent from history. Configs hold
+placeholders only.
+Follow-ups (for the merge/rename phase, not blockers):
+- [ ] Rename stale "AI Analyst Plus" in README (title + clone URL); `pyproject` already on `ai-analyst`
+- [ ] Install `gitleaks` as a CI pre-publish gate (not installed; manual scan used this round)
 
 ---
 
-## Phase D — De-duplicate knowledge & validation  *(REPORT ONLY — do not execute)*
+## Phase D — De-duplicate knowledge & validation — REPORT DELIVERED ✅ (do not execute)
+Full report: `docs/internal/dedupe-report.md`. **Awaiting Shane's approval before any change.**
 
-> Per Shane: **write a report on dedupe, do not change anything, do not merge without me.**
+Headline: repo is *less* redundant than feared. Verified NON-overlaps (keep separate):
+`corrections/` vs `query-archaeology/` (mistakes-to-avoid vs patterns-to-reuse),
+`business_rules.py` (engine) vs `business_validation.py` (loader), `metric_validator.py`
+(validates definitions, not dataframes).
 
-- [ ] Report: overlapping knowledge subsystems — `corrections/` vs `query-archaeology/` (purpose overlap), plus `analyses/`, `references/`, `organizations/`, `reliability/`, `datasets/`
-- [ ] Report: deprecated shim `helpers/tieout_helpers.py` (→ `cross_verification.py`)
-- [ ] Report: validation stack overlap (4 validators + confidence_scoring + business_rules + semantic-validation)
-- [ ] Deliver as `docs/internal/dedupe-report.md`; Shane reviews before any change
+Genuine low-risk dedup wins (PENDING APPROVAL — not executed):
+1. Delete `helpers/tieout_helpers.py` shim — re-point 3 doc/util refs first. Effort S.
+2. Consolidate `semantic-validation` skill vs Validation agent (duplicate prose → drift). Effort S–M.
+3. `feedback-capture` double-writes to `corrections/` + `learnings/` — tighten routing. Effort S.
 
 ---
 
