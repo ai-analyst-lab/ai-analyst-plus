@@ -89,7 +89,6 @@ data/zillow/
 **/slides_*.pdf
 **/slides_*.html
 docs/**/*.pdf
-!docs/hawaii_root_cause_deck.pdf
 
 # Logs
 *.log

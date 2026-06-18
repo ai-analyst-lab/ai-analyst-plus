@@ -216,6 +216,9 @@ condition matches -- you do not need to be asked.
 | Deck Rescue | `.claude/skills/deck-rescue/skill.md` | Invoked as `/deck-rescue` — full deck rewrite pipeline: diagnose → extract story → rebuild narrative arc → new Marp deck + before/after comparison. |
 | Analysis Design | `.claude/skills/analysis-design/skill.md` | Invoked as `/analysis-design` — full lifecycle: hunch → testable hypothesis → confound scan → investigation plan → V1 → feedback synthesis → V2 redesign. Orchestrates 3 agents. |
 | Stress Test | `.claude/skills/stress-test/skill.md` | Invoked as `/stress-test` — standalone 7-point review of any analysis plan for methodological flaws (wrong baselines, survivorship bias, missing segments, confounds, no kill criteria). |
+| North Star | `.claude/skills/north-star/skill.md` | Invoked as `/north-star [verb]` — North Star Metric lifecycle coach (design, audit, drivers, inputs, triage). Composes with metric-spec, guardrails, tracking-gaps. |
+| Teach | `.claude/skills/teach/skill.md` | Invoked as `/teach <topic>` — generate teaching visuals for analytics/stats concepts (the specific picture that makes one intuition click). |
+| Skill Creator | `.claude/skills/skill-creator/skill.md` | Invoked as `/skill-creator` — create, edit, and benchmark skills; optimize a skill's description for trigger accuracy. |
 
 **How skills work:** Read the skill file when triggered and follow its instructions. Multiple skills can apply at once (e.g., Visualization Patterns + Triangulation).
 
