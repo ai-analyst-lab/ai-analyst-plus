@@ -188,7 +188,7 @@ condition matches -- you do not need to be asked.
 | Forecast | `.claude/skills/forecast/skill.md` | Producing a time-series forecast or projection |
 | History | `.claude/skills/history/skill.md` | Invoked as `/history` — view past analyses from the archive |
 | Patterns | `.claude/skills/patterns/skill.md` | Detecting recurring analytical patterns across analyses |
-| Semantic Validation | `.claude/skills/semantic-validation/skill.md` | After validation agent — semantic cross-checks on findings |
+| Semantic Validation | `.claude/skills/semantic-validation/skill.md` | Conceptual spec of the 4-layer validation stack (structural/logical/business/Simpson's) + confidence grade. The Validation agent + `confidence_scoring.py` are the executable source of truth |
 | Archive Analysis | `.claude/skills/archive-analysis/skill.md` | End of pipeline — archive analysis results to .knowledge/ |
 | Architect | `.claude/skills/architect/skill.md` | Invoked as `/architect` — multi-persona planning methodology to produce a master plan for a new project or feature |
 | Setup | `.claude/skills/setup/skill.md` | Invoked as `/setup` — interactive interview for profile, data connection, and business context |

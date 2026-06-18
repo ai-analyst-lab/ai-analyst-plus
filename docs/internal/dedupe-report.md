@@ -1,4 +1,18 @@
-STATUS: REPORT ONLY — NO CHANGES MADE.
+STATUS: REPORT ONLY — NO CHANGES MADE (original investigation).
+
+## Execution status (2026-06-18, post-approval)
+- **Win 1 — delete `tieout_helpers.py` shim:** ✅ DONE (`5f6a4b6`-amended). Re-pointed 5 refs;
+  import-layer check + health check + 849 tests pass.
+- **Win 2 — `semantic-validation` skill vs Validation agent:** ✅ DONE (light consolidation).
+  Established single source of truth: the executable validators + `confidence_scoring.py`
+  (run by the Validation agent) are canonical; the skill's parallel 0–80 rubric is now
+  explicitly "illustrative — `confidence_scoring.py` wins." Fixed the inaccurate CLAUDE.md
+  description. Did NOT gut the 476-line skill (it's a CRITICAL gate; full rewrite deferred).
+- **Win 3 — `feedback-capture` corrections vs learnings double-write:** ❎ NO CHANGE NEEDED.
+  On closer read the skill already routes each message to exactly ONE bucket via Step 1
+  "prioritize: Correction > Learning > Positive." Corrections (specific SQL mistakes) and
+  learnings (reusable methodology) are distinct signal types — the same legitimate split as
+  corrections-vs-archaeology. Not a redundancy.
 
 # AI Analyst v3 — Redundancy / De-duplication Report (Phase D)
 

@@ -21,6 +21,13 @@ be invoked standalone: "Validate the quality of this analysis."
 
 ## Instructions
 
+> **Source of truth.** The executable validators (`helpers/structural_validator.py`,
+> `logical_validator.py`, `business_rules.py`, `simpsons_paradox.py`) and the grade from
+> `helpers/confidence_scoring.py` — run by the Validation agent (Steps 5a–5e in
+> `agents/validation.md`) — are canonical. This skill is the conceptual description of that
+> same 4-layer stack; where the two differ, the helpers + agent win. The per-layer point
+> values below are illustrative — the authoritative A–F grade comes from `confidence_scoring.py`.
+
 Run all 4 validation layers in sequence. For each layer, assign a score (0-15 points) and severity (PASS/WARNING/BLOCKER).
 
 ### Layer 1: Structural Validation (0-15 points)
@@ -222,7 +229,10 @@ After running the SQL, always include this assessment:
 
 ### Confidence Scoring
 
-After completing all 4 layers, calculate the overall confidence score:
+The authoritative confidence score is computed by `helpers/confidence_scoring.py`
+(`score_confidence()` → A–F), the same function the Validation agent uses — so the badge is
+identical everywhere it appears. The formula below documents the intuition behind that
+score; if it ever diverges from `confidence_scoring.py`, the helper is canonical.
 
 **Formula:**
 ```
