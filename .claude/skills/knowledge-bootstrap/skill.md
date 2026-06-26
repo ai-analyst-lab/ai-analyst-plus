@@ -38,6 +38,23 @@ Read `.knowledge/active.yaml`.
 | `schema.md` | Yes | Generate via `schema_to_markdown()` or profiling |
 | `quirks.md` | No | Create empty template |
 | `metrics/index.yaml` | No | Count as 0 |
+| `semantic/entities.yaml` | No | Note "no semantic layer" |
+| `semantic/relationships.yaml` | No | Skip |
+| `semantic/custom_instructions.md` | No | Skip |
+| `semantic/dimensions.yaml` | No | Skip |
+| `semantic/measures.yaml` | No | Skip |
+| `semantic/filters.yaml` | No | Skip |
+| `semantic/verified_queries.yaml` | No | Skip |
+
+**Semantic layer (load before writing any SQL).** The `semantic/` files are the agent's map of the data,
+and the metric definitions are defined by MEANING, not by a stored number. Always load `entities.yaml`
+(authoritative source table + keys + grain + caveats per concept), `relationships.yaml` (verified joins +
+cardinality), and `custom_instructions.md` (cross-cutting business rules and gotchas), they are small and
+always relevant. Consult `dimensions.yaml` (synonyms + real sample values), `measures.yaml`, `filters.yaml`
+(named filters), and `verified_queries.yaml` (blessed question -> SQL exemplars) when writing a query.
+Before writing SQL: resolve the question's metric against `metrics/index.yaml`, pick the authoritative
+table(s) and join(s) from `entities`/`relationships`, use real `sample_values` for filter literals (never
+invent them), reuse a named filter or a verified query when one matches, and apply the custom instructions.
 
 **Schema generation if `schema.md` is missing (REQUIRED):**
 
