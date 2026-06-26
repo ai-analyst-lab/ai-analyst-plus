@@ -141,3 +141,6 @@ experiments/
 
 # Reliability check run output (audit trail, not source)
 .knowledge/reliability/
+
+# Codex-review run output (audit trail, not source)
+.knowledge/codex-review/

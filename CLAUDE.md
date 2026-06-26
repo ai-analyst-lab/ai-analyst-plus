@@ -155,6 +155,7 @@ condition matches -- you do not need to be asked.
 | Skill | Path | Apply When |
 |-------|------|------------|
 | Reliability | `.claude/skills/reliability/SKILL.md` | Invoked as `/reliability "<question>" [N]` — run the same question N independent times (default 5) and report STABLE vs DRIFT. The cheapest eval; needs no answer key (measures stability, not correctness). Calls `helpers/reliability_stats.py`; audit trail in `.knowledge/reliability/` |
+| Codex Review | `.claude/skills/codex-review/SKILL.md` | Invoked as `/codex-review` or "validate with codex" — a second model (Codex) independently re-derives the current analysis from the same data (blind to Claude's numbers) and reports AGREE/DISAGREE/PARTIAL per finding. Multi-model correctness check (complements `/reliability`'s stability check). Detects & guides plugin/CLI setup if missing. Calls `helpers/codex_validation.py`; audit trail in `.knowledge/codex-review/` |
 | Visualization Patterns | `.claude/skills/visualization-patterns/skill.md` | Generating any chart or visualization |
 | Presentation Themes | `.claude/skills/presentation-themes/skill.md` | Creating a deck or presentation |
 | Theme Picker | `.claude/skills/theme-picker/skill.md` | Interactive chart request with no theme decided — offer the theme menu. Skip when a theme is named, a session default is set, or the chart is inside a pipeline run |
