@@ -1,0 +1,15 @@
+# Where this analyst reads its CONTEXT from.
+#
+# source: local  -> context lives in the tool, .knowledge/datasets/{active}/ (the C0-C2 individual setup).
+# source: git    -> point at a communal context repo the team curates via PRs (the C3 team setup):
+#                   knowledge-bootstrap clones/pulls it to a cache and loads the semantic layer from there
+#                   instead of the local copy. Same loader, external source.
+#
+# Only the CONTEXT lives here (semantic layer + metric defs). The gold/answer-key never does (it stays
+# hidden with the eval harness, or the agent reads the answers and cheats).
+
+source: git                                          # local | git
+repo: /Users/shanebutler/projects/novamart-context   # a local path or a GitHub URL (e.g. git@github.com:org/novamart-context.git)
+ref: main                                            # branch or a pinned commit SHA
+dataset_path: datasets/novamart                      # where this dataset's semantic/ + metrics/ live in the repo
+cache: .knowledge/.context-cache                     # where the bootstrap syncs the repo to (gitignored)

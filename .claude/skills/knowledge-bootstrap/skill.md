@@ -30,7 +30,13 @@ Read `.knowledge/setup-state.yaml`.
 ### Step 2: Active Dataset
 Read `.knowledge/active.yaml`.
 - If `active_dataset` is null or missing, note "No active dataset" and continue.
-- If set, load from `.knowledge/datasets/{active}/`:
+- **Resolve the context source first.** Call `resolve_context_dir(active, project_root)` from
+  `helpers/context_sync.py` -> `(ctx_dir, source)`. If `.knowledge/context-source.yaml` says `source: git`,
+  it clones/pulls the team's communal context repo to a cache and returns that dataset dir; otherwise it
+  returns the in-repo `.knowledge/datasets/{active}/`. Load the dataset knowledge (semantic/, metrics/,
+  schema.md, quirks.md) from `ctx_dir` either way - the same loader, the source just differs. Report the
+  source ("context: local" or "context: team repo @ {ref}") in the readiness summary.
+- Load from `ctx_dir`:
 
 | File | Required | If Missing |
 |------|----------|------------|

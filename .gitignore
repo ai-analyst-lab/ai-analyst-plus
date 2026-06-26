@@ -141,3 +141,6 @@ experiments/
 
 # Reliability check run output (audit trail, not source)
 .knowledge/reliability/
+
+# communal context repo clone (synced by context_sync, not committed)
+.knowledge/.context-cache/
