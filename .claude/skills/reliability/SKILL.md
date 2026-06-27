@@ -68,3 +68,10 @@ runs are genuinely independent (some tools cache answers, and then it sees nothi
 - The fix for drift is not a smarter model, it's context: define the metric once in the
   dictionary (the `/metric-spec` skill, or just tell the analyst the definition and ask it
   to save it), then run `/reliability` again and the runs converge on the meaning you set.
+- One exception: when you are running a *comparison* (with-and-without, the `/compare` skill),
+  do NOT save the definition into the dictionary with `/metric-spec`. That writes the base
+  `index.yaml` permanently and erases the no-definition baseline the comparison needs. Stage
+  it as a temporary overlay through the eval tool's adapter instead
+  (`AIAnalystPlusAdapter().stage(<setup_dir>)` composes base + overlay for the run,
+  `.restore()` puts it back). Save into the dictionary only when you want the definition to
+  be permanent, not for a comparison.
