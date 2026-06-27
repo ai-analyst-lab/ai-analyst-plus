@@ -144,8 +144,12 @@ experiments/
 
 # communal context repo clone (synced by context_sync, not committed)
 .knowledge/.context-cache/
-# Codex-review run output (audit trail, not source)
+# Legacy Claude /codex-review run output (audit trail, not source)
 .knowledge/codex-review/
+# Codex-native independent-review run output (audit trail, not source)
+.knowledge/independent-review/
+# Codex-native claude-review run output (audit trail, not source)
+.knowledge/claude-review/
 # comparison scratch outputs
 .knowledge/comparison/
 .knowledge/comparisons/
