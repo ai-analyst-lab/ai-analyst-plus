@@ -7,7 +7,7 @@ description: Coach North Star Metric lifecycle work from Codex: explain NSM conc
 
 ## Purpose
 
-Provide a Codex-native wrapper around the repository's North Star Metric playbook, helpers, wiki, and specialist agents while preserving citation discipline, calibration boundaries, and artifact contracts. Shared deterministic runtime helpers live under `helpers/north_star/`; the current curated wiki corpus remains in `.claude/skills/north-star/wiki/` until it is extracted to a provider-neutral location.
+Provide a Codex-native wrapper around the repository's North Star Metric playbook, helpers, wiki, and specialist agents while preserving citation discipline, calibration boundaries, and artifact contracts. Shared deterministic runtime helpers live under `helpers/north_star/`; the curated wiki corpus lives in the provider-neutral `shared/north-star/wiki/` folder, with `.claude/skills/north-star/wiki` retained as a legacy compatibility symlink.
 
 ## When to use
 
@@ -35,7 +35,7 @@ If no verb is clear, show the current NSM if profile state exists; otherwise pre
 
 ### Shared corpus and core principles
 
-Read `.claude/skills/north-star/_lib/core_principles.md` or the corresponding shared standard before making framework claims. Treat `.claude/skills/north-star/wiki/` as the current curated NSM corpus and prefer extracting it to a future provider-neutral shared location rather than duplicating wiki content in Codex. Honor cite-on-claim, never-fabricate, contested-zone, and boundary-speech rules.
+Read `.claude/skills/north-star/_lib/core_principles.md` or the corresponding shared standard before making framework claims. Treat `shared/north-star/wiki/` as the curated NSM corpus; do not duplicate wiki content into provider-specific skill folders. Honor cite-on-claim, never-fabricate, contested-zone, and boundary-speech rules.
 
 ### Use deterministic helpers where available
 
@@ -90,7 +90,8 @@ For NSM judgment outputs include:
 - `7-checklist`
 - `outputs/north-star`
 - `helpers/north_star/`
-- `.claude/skills/north-star/wiki/`
+- `shared/north-star/wiki/`
+- `.claude/skills/north-star/wiki/` legacy symlink
 
 ## Codex adaptation notes
 
