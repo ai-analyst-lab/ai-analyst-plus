@@ -5,19 +5,28 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 
 | Skill | Path | Use when | Key artifacts |
 |---|---|---|---|
+| `connect-data` | `.agents/skills/connect-data/SKILL.md` | The user wants to add/connect/set up data or configure CSV, DuckDB, MotherDuck, PostgreSQL, BigQuery, or Snowflake for analysis. | `.knowledge/datasets/{dataset}/manifest.yaml`, `.knowledge/datasets/{dataset}/schema.md`, `.knowledge/active.yaml` |
+| `datasets` | `.agents/skills/datasets/SKILL.md` | The user wants to list connected datasets, see the active dataset, or choose which data source to analyze. | `data_sources.yaml`, `.knowledge/datasets/`, `.knowledge/active.yaml` |
+| `switch-dataset` | `.agents/skills/switch-dataset/SKILL.md` | The user wants to change the active dataset or use a different connected data source. | `.knowledge/active.yaml` |
+| `data-inspect` | `.agents/skills/data-inspect/SKILL.md` | The user wants to see active dataset schema, tables, columns, row counts, keys, or table structure. | `.knowledge/datasets/{active}/schema.md` |
+| `metric-spec` | `.agents/skills/metric-spec/SKILL.md` | The user wants to define, clarify, document, standardize, or register a business/product metric with denominator, time window, filters, thresholds, and source SQL. | `.knowledge/datasets/{active}/metrics/` |
+| `reliability` | `.agents/skills/reliability/SKILL.md` | The user wants to check whether an analytics answer is stable across independent repeated runs. | `.knowledge/reliability/<run>/`, `.knowledge/reliability/log.jsonl` |
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
-| `metric-spec` | `.agents/skills/metric-spec/SKILL.md` | The user wants to define, clarify, document, standardize, or register a business/product metric with denominator, time window, filters, thresholds, and source SQL. | `.knowledge/datasets/{active}/metrics/` |
 
 ## Invocation
 
 Codex skills are not slash commands. Invoke them with natural language or `$skill-name`, for example:
 
 ```text
-Use $skill-parity-review to review metric-spec.
-Use $skill-parity-review to port metric-spec to Codex and bring it to parity with the Claude skill.
+Use $connect-data to add a CSV directory.
+Use $datasets to list connected data sources.
+Use $switch-dataset production-analytics to change the active dataset.
+Use $data-inspect to inspect the active schema.
 Use $metric-spec to define checkout conversion rate.
+Use $reliability "What is our 30-day retention rate?" 5 to check answer stability.
+Use $skill-parity-review to port another Claude skill to Codex.
 ```
 
 Do not use underscore slash commands such as `/skill_parity_review`; Codex treats those as unsupported built-in commands.
