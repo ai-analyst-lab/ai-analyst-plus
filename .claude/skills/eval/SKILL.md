@@ -107,7 +107,7 @@ full runs.
 
 ## Notes
 - The run record is the same shape the monitor reads (it carries `git_sha` + `changelog`), so a
-  sequence of `/eval` runs renders as the trend line in `/monitor`.
+  sequence of `/eval` runs renders as the trend line in the monitor dashboard (`aievals/monitor.py`).
 - Blind discipline: never paste gold sql/values into a sub-agent's context. If you need to debug a
   failure, read the run record's per-case detail (it shows gold next to analyst for the human), not
   the sub-agent.
