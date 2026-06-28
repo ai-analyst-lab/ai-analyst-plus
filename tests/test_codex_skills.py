@@ -346,6 +346,7 @@ def test_remaining_ports_are_in_docs_and_report():
         assert name not in report["missing_codex"]
 
 FINAL_PORT_CONTRACTS = {
+    "eval": ['held-out', 'blind', 'query similarity'],
     "codex-review": ['AGREE', 'DISAGREE', 'blind brief'],
 }
 
