@@ -39,7 +39,8 @@ The active dataset is stored in:
 
 ### 2. Define metrics before analysis
 
-Use `$metric-spec` when a metric lacks a denominator, time window, grain, filters,
+Use `$data-quality-check` before drawing conclusions from a dataset or table. Use
+`$metric-spec` when a metric lacks a denominator, time window, grain, filters,
 attribution rule, source table, or threshold. Registered metric specs live under:
 
 ```text
@@ -88,8 +89,11 @@ See `.agents/skills/INDEX.md` for the canonical list. The current core set inclu
 - `$datasets`
 - `$switch-dataset`
 - `$data-inspect`
+- `$data-quality-check`
 - `$metric-spec`
 - `$reliability`
+- `$compare`
+- `$experiment`
 - `$independent-review`
 - `$claude-review`
 - `$skill-parity-review`

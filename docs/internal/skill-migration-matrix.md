@@ -15,11 +15,11 @@ outcomes, not copy-paste prompt parity.
 | `independent-review` | `$independent-review` | Ported | P0 | Provider-neutral blind validation. |
 | `claude-review` | `$claude-review` | Codex-only | P0 | Codex asks Claude for blind validation. |
 | `skill-parity-review` | `$skill-parity-review` | Ported | P0 | Migration utility for additional skills. |
-| `data-quality-check` | missing | Not started | P1 | Candidate next core analysis quality port. |
+| `data-quality-check` | `$data-quality-check` | Ported | P1 | Pre-analysis completeness, consistency, coverage, freshness, and sanity checks. |
 | `run-pipeline` | missing | Not started | P1 | Needs Codex-native orchestration over `agents/registry.yaml`. |
 | `resume-pipeline` | missing | Not started | P1 | Should share pipeline state conventions. |
-| `experiment` | missing | Not started | P1 | Should reuse experiment helpers. |
-| `compare` | missing | Not started | P1 | Needs temporary metric overlay caution. |
+| `experiment` | `$experiment` | Ported | P1 | Lifecycle workflow using `helpers/experiment_stats/`. |
+| `compare` | `$compare` | Ported | P1 | With/without context comparison; external overlay adapter may be required. |
 | `export` | missing | Not started | P1 | Delivery workflow; may need integration-specific notes. |
 | `presentation-themes` | missing | Not started | P2 | Presentation layer migration. |
 | `google-doc-export` | missing | Not started | P2 | MCP/integration availability must be explicit. |
@@ -29,12 +29,11 @@ outcomes, not copy-paste prompt parity.
 
 ## Recommended next ports
 
-1. `$data-quality-check`
-2. `$experiment`
-3. `$compare`
-4. `$run-pipeline`
-5. `$resume-pipeline`
-6. `$export`
+1. `$run-pipeline`
+2. `$resume-pipeline`
+3. `$export`
+4. `$presentation-themes`
+5. `$session-handoff`
 
 Use `$skill-parity-review` for each port and save review artifacts under
 `working/skill_parity_review/`.
