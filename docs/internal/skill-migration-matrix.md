@@ -44,6 +44,7 @@ outcomes, not copy-paste prompt parity.
 | `architect` | `$architect` | Ported | P2 | Remaining Codex wrapper port; static parity only. |
 | `auth-preflight` | `$auth-preflight` | Ported | P2 | Remaining Codex wrapper port; static parity only. |
 | `chart-to-drive` | `$chart-to-drive` | Ported | P2 | Remaining Codex wrapper port; static parity only. |
+| `connect-snowflake` | `$connect-snowflake` | Ported | P2 | Remaining Codex wrapper port; static parity only. |
 | `log-correction` | `$log-correction` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `feedback-capture` | `$feedback-capture` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `business` | `$business` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |

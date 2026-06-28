@@ -43,6 +43,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `architect` | `.agents/skills/architect/SKILL.md` | The user wants a multi-persona project plan, implementation roadmap, wave structure, task specs, or build tracker. | `working/plans/`, `MASTER_PLAN.md`, `BUILD_STATUS.yaml` |
 | `auth-preflight` | `.agents/skills/auth-preflight/SKILL.md` | Google Docs, Slides, Drive, or Workspace work needs authentication/tool availability checked before generation. | Auth status block, local fallback recommendation |
 | `chart-to-drive` | `.agents/skills/chart-to-drive/SKILL.md` | Local charts/images must be uploaded to Drive for Google Docs or Slides insertion. | `working/chart_drive_manifest_*.yaml`, Drive URLs/IDs |
+| `connect-snowflake` | `.agents/skills/connect-snowflake/SKILL.md` | The user wants to configure, validate, or troubleshoot a Snowflake analysis connection. | `.knowledge/datasets/{dataset}/`, `.knowledge/active.yaml` |
 | `log-correction` | `.agents/skills/log-correction/SKILL.md` | User explicitly wants to log/save/record a correction or mistake. | `.knowledge/corrections/log.yaml`, `.knowledge/corrections/index.yaml` |
 | `feedback-capture` | `.agents/skills/feedback-capture/SKILL.md` | User corrects an answer, teaches a reusable preference, or asks to remember feedback. | `.knowledge/corrections/`, `.knowledge/learnings/index.md` |
 | `business` | `.agents/skills/business/SKILL.md` | User wants documented business context: glossary, products, metrics, objectives, teams, or term lookup. | `.knowledge/organizations/` |
@@ -105,6 +106,7 @@ Use $north-star to explain, triage, audit, or work on an NSM.
 Use $architect to create a multi-persona project plan.
 Use $auth-preflight before Google Docs/Slides/Drive work.
 Use $chart-to-drive to upload chart assets for Google insertion.
+Use $connect-snowflake to configure a Snowflake dataset connection.
 Use $log-correction to record a mistake and fix.
 Use $feedback-capture when the user gives a correction or reusable preference.
 Use $business to browse organization context.
