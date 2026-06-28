@@ -53,6 +53,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `knowledge-bootstrap` | `.agents/skills/knowledge-bootstrap/SKILL.md` | Session or dataset context needs loading from `.knowledge/` before analysis. | `.knowledge/.bootstrap_timestamp`, readiness summary |
 | `notion-ingest` | `.agents/skills/notion-ingest/SKILL.md` | Notion workspace/page/database content should populate organization knowledge. | `.knowledge/query-archaeology/raw/`, `.knowledge/organizations/` |
 | `setup-dev-context` | `.agents/skills/setup-dev-context/SKILL.md` | Developers need codebase, dbt, SQL, schema, or team data conventions captured. | `.knowledge/user/dev-context.yaml` |
+| `setup-notion` | `.agents/skills/setup-notion/SKILL.md` | Notion MCP/OAuth access needs configuration or verification. | Notion auth status, Analysis Gallery status |
 | `log-correction` | `.agents/skills/log-correction/SKILL.md` | User explicitly wants to log/save/record a correction or mistake. | `.knowledge/corrections/log.yaml`, `.knowledge/corrections/index.yaml` |
 | `feedback-capture` | `.agents/skills/feedback-capture/SKILL.md` | User corrects an answer, teaches a reusable preference, or asks to remember feedback. | `.knowledge/corrections/`, `.knowledge/learnings/index.md` |
 | `business` | `.agents/skills/business/SKILL.md` | User wants documented business context: glossary, products, metrics, objectives, teams, or term lookup. | `.knowledge/organizations/` |
@@ -125,6 +126,7 @@ Use $eval to run a blind gold-suite evaluation.
 Use $knowledge-bootstrap to load session/dataset knowledge context.
 Use $notion-ingest to import Notion docs into knowledge context.
 Use $setup-dev-context to capture codebase and SQL conventions.
+Use $setup-notion to configure or verify Notion access.
 Use $log-correction to record a mistake and fix.
 Use $feedback-capture when the user gives a correction or reusable preference.
 Use $business to browse organization context.

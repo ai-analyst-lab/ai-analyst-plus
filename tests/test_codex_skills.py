@@ -346,6 +346,7 @@ def test_remaining_ports_are_in_docs_and_report():
         assert name not in report["missing_codex"]
 
 FINAL_PORT_CONTRACTS = {
+    "setup-notion": ['OAuth', 'Analysis Gallery', '.mcp.json'],
     "setup-dev-context": ['.knowledge/user/dev-context.yaml', 'SQL conventions', 'dev_context'],
     "notion-ingest": ['BFS', '.knowledge/query-archaeology/raw', 'business/metrics/index.yaml'],
     "knowledge-bootstrap": ['.knowledge/active.yaml', 'semantic/entities.yaml', '.bootstrap_timestamp'],
