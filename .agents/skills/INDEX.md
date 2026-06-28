@@ -25,6 +25,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
+| `question-framing` | `.agents/skills/question-framing/SKILL.md` | User asks a broad/ambiguous analytics question that needs scoping before analysis. | Framed question block |
 | `stakeholder-communication` | `.agents/skills/stakeholder-communication/SKILL.md` | Analysis output needs to be tailored to executives, product, engineering, data, or stakeholders. | Audience-adapted narrative/deck/update |
 | `srm-check` | `.agents/skills/srm-check/SKILL.md` | Experiment/A-B test data or treatment/control assignment needs randomization integrity check. | SRM result table |
 | `guardrails` | `.agents/skills/guardrails/SKILL.md` | A metric lift or metric definition needs guardrail checks for trade-offs. | Analysis report guardrail section |
@@ -61,6 +62,7 @@ Use $google-doc-export to create a formatted Google Doc with local backup.
 Use $google-slides-export to create a Google Slides deck when tools are available.
 Use $notion-export to publish analysis to Notion when tools are available.
 Use $skill-parity-review to port another Claude skill to Codex.
+Use $question-framing to scope an ambiguous analytics question.
 Use $stakeholder-communication to tailor findings for leadership.
 Use $srm-check before analyzing experiment effects.
 Use $guardrails before presenting a metric lift as a win.
