@@ -14,6 +14,9 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `reliability` | `.agents/skills/reliability/SKILL.md` | The user wants to check whether an analytics answer is stable across independent repeated runs. | `.knowledge/reliability/<run>/`, `.knowledge/reliability/log.jsonl` |
 | `compare` | `.agents/skills/compare/SKILL.md` | The user wants to compare an analytics question with and without a context or metric-definition overlay. | `.knowledge/comparisons/` |
 | `experiment` | `.agents/skills/experiment/SKILL.md` | The user wants to design, power, monitor, analyze, interpret, or report on an experiment or A/B test. | `experiments/{slug}/` |
+| `run-pipeline` | `.agents/skills/run-pipeline/SKILL.md` | The user wants an end-to-end multi-phase analysis workflow, validated narrative, charts, and deck/export artifacts. | `working/runs/{run}/`, `outputs/` |
+| `resume-pipeline` | `.agents/skills/resume-pipeline/SKILL.md` | The user wants to continue, recover, or finish an interrupted pipeline run. | `working/latest/pipeline_state.json`, `working/runs/` |
+| `export` | `.agents/skills/export/SKILL.md` | The user wants to export/share/send analysis results as slides, email, Slack, brief, data, docx, Google Doc, Notion, or receipt. | `outputs/` |
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
@@ -32,6 +35,9 @@ Use $metric-spec to define checkout conversion rate.
 Use $reliability "What is our 30-day retention rate?" 5 to check answer stability.
 Use $compare "What's our retention rate?" --with .knowledge/comparisons/conditions/c1_retention_contract.
 Use $experiment analyze checkout-redesign to analyze an A/B test.
+Use $run-pipeline question="Why did conversion drop?" to run the full workflow.
+Use $resume-pipeline to continue an interrupted run.
+Use $export brief to create a stakeholder decision brief.
 Use $skill-parity-review to port another Claude skill to Codex.
 ```
 

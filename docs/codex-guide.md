@@ -94,6 +94,9 @@ See `.agents/skills/INDEX.md` for the canonical list. The current core set inclu
 - `$reliability`
 - `$compare`
 - `$experiment`
+- `$run-pipeline`
+- `$resume-pipeline`
+- `$export`
 - `$independent-review`
 - `$claude-review`
 - `$skill-parity-review`
@@ -101,8 +104,7 @@ See `.agents/skills/INDEX.md` for the canonical list. The current core set inclu
 ## Known limitations
 
 Codex migration is in progress. Some legacy Claude workflows do not yet have Codex-native
-counterparts, including several export, presentation, pipeline orchestration, and integration
-skills. When a Codex skill is missing, use `$skill-parity-review` to port the corresponding
+counterparts, including several presentation and integration skills. When a Codex skill is missing, use `$skill-parity-review` to port the corresponding
 Claude skill safely instead of copying Claude-specific mechanics.
 
 ## Development checks
