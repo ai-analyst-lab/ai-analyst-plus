@@ -346,6 +346,7 @@ def test_remaining_ports_are_in_docs_and_report():
         assert name not in report["missing_codex"]
 
 FINAL_PORT_CONTRACTS = {
+    "skill-creator": ['progressive disclosure', 'evals/evals.json', 'benchmark'],
     "show-off": ['git status --short', 'ASCII diagram', 'confirm before posting'],
     "setup-snowflake": ['Snowflake', 'read-only', '.knowledge/datasets'],
     "setup-notion": ['OAuth', 'Analysis Gallery', '.mcp.json'],
