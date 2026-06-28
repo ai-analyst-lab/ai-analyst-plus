@@ -25,6 +25,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
+| `analysis-design-spec` | `.agents/skills/analysis-design-spec/SKILL.md` | A new analytical request needs a lightweight seven-field scope/spec before querying. | Analysis Design Spec |
 | `analysis-design` | `.agents/skills/analysis-design/SKILL.md` | Complex investigation or stakeholder-feedback redesign needs a multi-stage plan. | Analysis Design Brief |
 | `triangulation` | `.agents/skills/triangulation/SKILL.md` | Important findings need sanity checks across segments, tie-outs, sources, and plausibility. | Validation Report |
 | `stress-test` | `.agents/skills/stress-test/SKILL.md` | User wants to challenge an analysis plan, hypothesis, or finding for failure modes. | Stress Test Scorecard |
@@ -77,6 +78,7 @@ Use $google-doc-export to create a formatted Google Doc with local backup.
 Use $google-slides-export to create a Google Slides deck when tools are available.
 Use $notion-export to publish analysis to Notion when tools are available.
 Use $skill-parity-review to port another Claude skill to Codex.
+Use $analysis-design-spec before starting analysis work.
 Use $analysis-design for complex investigation planning.
 Use $triangulation to sanity-check important findings.
 Use $stress-test to find weaknesses before execution or presentation.
