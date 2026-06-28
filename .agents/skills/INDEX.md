@@ -25,6 +25,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
+| `trace` | `.agents/skills/trace/SKILL.md` | User asks where a reported number came from or wants SQL provenance. | `working/trace_{analysis_id}.html` |
 | `runs` | `.agents/skills/runs/SKILL.md` | User wants pipeline run history, latest run, run detail, compare runs, or cleanup. | `working/runs/`, `working/latest/`, `.knowledge/analyses/` |
 | `patterns` | `.agents/skills/patterns/SKILL.md` | User asks what recurring patterns have been seen or whether a finding is known. | `.knowledge/analyses/_patterns.yaml` |
 | `history` | `.agents/skills/history/SKILL.md` | User wants archived analysis history, prior findings, or similar past work. | `.knowledge/analyses/index.yaml` |
@@ -53,6 +54,7 @@ Use $google-doc-export to create a formatted Google Doc with local backup.
 Use $google-slides-export to create a Google Slides deck when tools are available.
 Use $notion-export to publish analysis to Notion when tools are available.
 Use $skill-parity-review to port another Claude skill to Codex.
+Use $trace to render SQL provenance for reported numbers.
 Use $runs to inspect pipeline run history.
 Use $patterns to search recurring findings.
 Use $history to browse archived analyses.
