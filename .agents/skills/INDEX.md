@@ -25,6 +25,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
+| `forecast` | `.agents/skills/forecast/SKILL.md` | User asks to forecast, project, predict, or extrapolate a metric. | `working/forecast_*.png` |
 | `teach` | `.agents/skills/teach/SKILL.md` | User asks to teach an analytics/statistics concept with visuals. | `outputs/charts/teach/` |
 | `theme-picker` | `.agents/skills/theme-picker/SKILL.md` | Interactive chart/deck request needs a visual theme selection. | `working/session_state.yaml` default_theme |
 | `pace` | `.agents/skills/pace/SKILL.md` | User wants to change narration/pausing/verbosity for analysis workflows. | `working/session_state.yaml` |
@@ -57,6 +58,7 @@ Use $google-doc-export to create a formatted Google Doc with local backup.
 Use $google-slides-export to create a Google Slides deck when tools are available.
 Use $notion-export to publish analysis to Notion when tools are available.
 Use $skill-parity-review to port another Claude skill to Codex.
+Use $forecast to project a time-series metric.
 Use $teach signal-vs-noise to generate a teaching visual.
 Use $theme-picker to choose a chart theme.
 Use $pace narrated to change workflow narration.
