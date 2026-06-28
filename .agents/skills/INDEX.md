@@ -55,6 +55,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `setup-dev-context` | `.agents/skills/setup-dev-context/SKILL.md` | Developers need codebase, dbt, SQL, schema, or team data conventions captured. | `.knowledge/user/dev-context.yaml` |
 | `setup-notion` | `.agents/skills/setup-notion/SKILL.md` | Notion MCP/OAuth access needs configuration or verification. | Notion auth status, Analysis Gallery status |
 | `setup-snowflake` | `.agents/skills/setup-snowflake/SKILL.md` | First-time Snowflake setup, connection testing, or dataset knowledge creation is needed. | `.env`/MCP guidance, `.knowledge/datasets/{dataset}/` |
+| `show-off` | `.agents/skills/show-off/SKILL.md` | The user wants to share recent work with a narrative and ASCII diagram. | `working/show_off_*.md` or Slack post |
 | `log-correction` | `.agents/skills/log-correction/SKILL.md` | User explicitly wants to log/save/record a correction or mistake. | `.knowledge/corrections/log.yaml`, `.knowledge/corrections/index.yaml` |
 | `feedback-capture` | `.agents/skills/feedback-capture/SKILL.md` | User corrects an answer, teaches a reusable preference, or asks to remember feedback. | `.knowledge/corrections/`, `.knowledge/learnings/index.md` |
 | `business` | `.agents/skills/business/SKILL.md` | User wants documented business context: glossary, products, metrics, objectives, teams, or term lookup. | `.knowledge/organizations/` |
@@ -129,6 +130,7 @@ Use $notion-ingest to import Notion docs into knowledge context.
 Use $setup-dev-context to capture codebase and SQL conventions.
 Use $setup-notion to configure or verify Notion access.
 Use $setup-snowflake to configure and test Snowflake.
+Use $show-off to create a community showcase of recent work.
 Use $log-correction to record a mistake and fix.
 Use $feedback-capture when the user gives a correction or reusable preference.
 Use $business to browse organization context.

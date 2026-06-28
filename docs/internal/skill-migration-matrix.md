@@ -56,6 +56,7 @@ outcomes, not copy-paste prompt parity.
 | `setup-dev-context` | `$setup-dev-context` | Ported | P2 | Final-batch Codex wrapper port; static parity only. |
 | `setup-notion` | `$setup-notion` | Ported | P2 | Final-batch Codex wrapper port; static parity only. |
 | `setup-snowflake` | `$setup-snowflake` | Ported | P2 | Final-batch Codex wrapper port; static parity only. |
+| `show-off` | `$show-off` | Ported | P2 | Final-batch Codex wrapper port; static parity only. |
 | `log-correction` | `$log-correction` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `feedback-capture` | `$feedback-capture` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `business` | `$business` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
