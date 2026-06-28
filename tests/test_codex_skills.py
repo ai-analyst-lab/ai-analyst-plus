@@ -201,6 +201,14 @@ def test_teach_port_includes_runnable_topic_script():
     assert "outputs/charts/teach" in text
 
 
+def test_teach_port_uses_shared_signal_vs_noise_topic():
+    shared_topic = Path("shared/teach/topics/signal_vs_noise.py")
+    codex_wrapper = SKILLS_DIR / "teach" / "topics" / "signal_vs_noise.py"
+    assert shared_topic.exists()
+    assert "def main" in shared_topic.read_text()
+    assert "shared" in codex_wrapper.read_text()
+
+
 def test_migration_report_reflects_easy_medium_batch():
     from scripts.report_skill_migration import build_report
 
