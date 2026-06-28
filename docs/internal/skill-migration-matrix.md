@@ -38,6 +38,7 @@ outcomes, not copy-paste prompt parity.
 | `causal` | `$causal` | Ported | P2 | Medium Codex wrapper port; static parity only. |
 | `setup` | `$setup` | Ported | P2 | Expert/tool-heavy Codex wrapper port; static parity only. |
 | `question-router` | `$question-router` | Ported | P2 | Expert/tool-heavy Codex wrapper port; static parity only. |
+| `semantic-validation` | `$semantic-validation` | Ported | P2 | Expert/tool-heavy Codex wrapper port; static parity only. |
 | `log-correction` | `$log-correction` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `feedback-capture` | `$feedback-capture` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `business` | `$business` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |

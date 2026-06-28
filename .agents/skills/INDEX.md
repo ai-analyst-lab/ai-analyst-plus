@@ -37,6 +37,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `causal` | `.agents/skills/causal/SKILL.md` | User asks whether a change caused an outcome or needs observational impact estimation. | `analyses/{slug}/working/`, `reports/causal_report_*.md` |
 | `setup` | `.agents/skills/setup/SKILL.md` | The user wants to onboard, configure the analyst, resume setup, check setup status, or reset setup state. | `.knowledge/setup-state.yaml`, `.knowledge/user/profile.md`, `.knowledge/user/business-context.md` |
 | `question-router` | `.agents/skills/question-router/SKILL.md` | An analytical request needs L1-L5 routing, pace choice, or NSM intent dispatch before execution. | L1-L5 route, pace mode, downstream skill choice |
+| `semantic-validation` | `.agents/skills/semantic-validation/SKILL.md` | Analysis findings need structural/logical/business-rule/Simpson validation and confidence grading. | Semantic Validation Report, confidence grade, validation SQL |
 | `log-correction` | `.agents/skills/log-correction/SKILL.md` | User explicitly wants to log/save/record a correction or mistake. | `.knowledge/corrections/log.yaml`, `.knowledge/corrections/index.yaml` |
 | `feedback-capture` | `.agents/skills/feedback-capture/SKILL.md` | User corrects an answer, teaches a reusable preference, or asks to remember feedback. | `.knowledge/corrections/`, `.knowledge/learnings/index.md` |
 | `business` | `.agents/skills/business/SKILL.md` | User wants documented business context: glossary, products, metrics, objectives, teams, or term lookup. | `.knowledge/organizations/` |
@@ -93,6 +94,7 @@ Use $explore to poke around data before formal analysis.
 Use $causal when experiments are impossible but impact needs estimation.
 Use $setup to onboard or check setup status.
 Use $question-router to classify an analytical question before execution.
+Use $semantic-validation to validate findings and assign confidence.
 Use $log-correction to record a mistake and fix.
 Use $feedback-capture when the user gives a correction or reusable preference.
 Use $business to browse organization context.
