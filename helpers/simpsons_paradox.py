@@ -720,9 +720,10 @@ def suggest_segments_to_check(
             col for col in df.columns
             if col != metric_column
             and (
-                df[col].dtype == "object"
-                or df[col].dtype.name == "category"
-                or (pd.api.types.is_bool_dtype(df[col]))
+                pd.api.types.is_object_dtype(df[col])
+                or pd.api.types.is_string_dtype(df[col])
+                or isinstance(df[col].dtype, pd.CategoricalDtype)
+                or pd.api.types.is_bool_dtype(df[col])
             )
         ]
     else:
