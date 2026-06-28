@@ -20,6 +20,7 @@ from pathlib import Path
 # The eval harness + blind gold live in the sibling repo (public, gold in-repo for teaching, D1).
 EVALS_REPO = Path(os.environ.get("AIEVALS_REPO", Path.home() / "projects" / "ai-analytics-evals"))
 GOLD_PATH = EVALS_REPO / "aievals" / "data" / "novamart_gold.yaml"
+CANDIDATES_PATH = EVALS_REPO / "aievals" / "data" / "novamart_gold_candidates.yaml"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -123,3 +124,19 @@ def grade(per_case_results, split, out_dir, conn, gold_path=GOLD_PATH,
         meta.update(extra_meta)
     return run_eval(str(gold_path), per_case_results, conn, out_dir=str(out_dir),
                     split=split, meta=meta)
+
+
+def verify_candidates(cases_path=CANDIDATES_PATH, split=None):
+    """Run every candidate gold sql against Snowflake and print which return a real number.
+
+    Use before merging candidates into the trusted suite (gold discipline: the sql must run and be
+    signed off). Preflights Snowflake (D3, fail loud), then recomputes each candidate's sql and
+    reports the value or the error. Returns the results list."""
+    if str(EVALS_REPO) not in sys.path:
+        sys.path.insert(0, str(EVALS_REPO))
+    from aievals.verify_gold import verify_cases, format_report
+
+    conn = preflight()
+    results = verify_cases(str(cases_path), conn, split=split)
+    print(format_report(results))
+    return results
