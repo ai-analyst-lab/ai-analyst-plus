@@ -25,6 +25,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
+| `analysis-design` | `.agents/skills/analysis-design/SKILL.md` | Complex investigation or stakeholder-feedback redesign needs a multi-stage plan. | Analysis Design Brief |
 | `triangulation` | `.agents/skills/triangulation/SKILL.md` | Important findings need sanity checks across segments, tie-outs, sources, and plausibility. | Validation Report |
 | `stress-test` | `.agents/skills/stress-test/SKILL.md` | User wants to challenge an analysis plan, hypothesis, or finding for failure modes. | Stress Test Scorecard |
 | `experiment-brief` | `.agents/skills/experiment-brief/SKILL.md` | User has an experiment idea and needs hypothesis, primary metric, guardrails, success criteria, and feasibility. | Experiment Brief |
@@ -76,6 +77,7 @@ Use $google-doc-export to create a formatted Google Doc with local backup.
 Use $google-slides-export to create a Google Slides deck when tools are available.
 Use $notion-export to publish analysis to Notion when tools are available.
 Use $skill-parity-review to port another Claude skill to Codex.
+Use $analysis-design for complex investigation planning.
 Use $triangulation to sanity-check important findings.
 Use $stress-test to find weaknesses before execution or presentation.
 Use $experiment-brief before designing or launching an A/B test.
