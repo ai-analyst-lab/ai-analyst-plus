@@ -26,6 +26,7 @@ outcomes, not copy-paste prompt parity.
 | `google-slides-export` | `$google-slides-export` | Ported | P2 | Google Slides API safety/layout workflow; live export requires tools/auth. |
 | `notion-export` | `$notion-export` | Ported | P2 | Notion page/gallery workflow; live export requires tools/auth. |
 | `session-handoff` | `$session-handoff` | Ported | P2 | Saves state to `working/session_state.yaml`. |
+| `causal` | `$causal` | Ported | P2 | Medium Codex wrapper port; static parity only. |
 | `log-correction` | `$log-correction` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `feedback-capture` | `$feedback-capture` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
 | `business` | `$business` | Ported | P2 | Easy/medium Codex wrapper port; static parity only. |
