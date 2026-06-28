@@ -26,6 +26,7 @@ outcomes, not copy-paste prompt parity.
 | `google-slides-export` | `$google-slides-export` | Ported | P2 | Google Slides API safety/layout workflow; live export requires tools/auth. |
 | `notion-export` | `$notion-export` | Ported | P2 | Notion page/gallery workflow; live export requires tools/auth. |
 | `session-handoff` | `$session-handoff` | Ported | P2 | Saves state to `working/session_state.yaml`. |
+| `archaeology` | `$archaeology` | Ported | P2 | Medium Codex wrapper port; static parity only. |
 | `analysis-design-spec` | `$analysis-design-spec` | Ported | P2 | Medium Codex wrapper port; static parity only. |
 | `analysis-design` | `$analysis-design` | Ported | P2 | Medium Codex wrapper port; static parity only. |
 | `triangulation` | `$triangulation` | Ported | P2 | Medium Codex wrapper port; static parity only. |
