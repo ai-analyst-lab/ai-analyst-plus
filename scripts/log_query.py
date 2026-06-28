@@ -97,7 +97,8 @@ def main():
     parser.add_argument("--tables", nargs="*", default=[], help="Tables accessed")
     parser.add_argument("--columns", nargs="*", default=[], help="Columns accessed")
     parser.add_argument("--result", default="", help="Brief result summary")
-    parser.add_argument("--result-value", default=None, help="Key numeric result")
+    parser.add_argument("--result-value", default=None, help="Key numeric result (scalar 1x1 result)")
+    parser.add_argument("--analysis-id", default=None, help="Provenance grouping id; falls back to current-analysis.json")
     parser.add_argument("--rows", type=int, default=None, help="Row count returned")
     parser.add_argument("--time-ms", type=float, default=0.0, help="Execution time in ms")
     parser.add_argument("--claims", nargs="*", default=[], help="Claim IDs this query supports")
@@ -115,13 +116,24 @@ def main():
             print("ERROR: No SQL provided on stdin", file=sys.stderr)
             sys.exit(1)
 
-    # Parse result_value
+    # Parse result_value — the hook passes "" when the result isn't a 1x1 scalar; treat blanks as None.
     result_value = args.result_value
-    if result_value is not None:
+    if result_value in (None, "", "null", "NULL"):
+        result_value = None
+    else:
         try:
             result_value = float(result_value)
         except ValueError:
             pass  # keep as string
+
+    # Resolve analysis_id: explicit arg wins; "" (the hook's no-id case) falls back to the context file.
+    analysis_id = args.analysis_id or None
+    if analysis_id is None:
+        try:
+            from helpers.analysis_context import current_analysis_id
+            analysis_id = current_analysis_id(create=False)
+        except Exception:
+            analysis_id = None
 
     # Override log path if specified
     if args.log_path:
@@ -150,6 +162,7 @@ def main():
             claim_ids=args.claims,
             status=args.status,
             error=args.error,
+            analysis_id=analysis_id,
         )
         print(f"Logged: {entry['query_id']} ({args.agent}, step {args.step})")
     except Exception as e:

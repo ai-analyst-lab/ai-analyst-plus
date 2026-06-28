@@ -44,6 +44,24 @@ TABLES=$(echo "$SQL" | grep -oiE '(FROM|JOIN)\s+[A-Za-z0-9_.]+' | sed 's/^[A-Za-
 # Build a brief result summary
 RESULT_SUMMARY="${ROW_COUNT} rows returned"
 
+# Capture the scalar result_value when the result is a single 1x1 cell (most metric queries are).
+# This is what makes finding<->query value-matching reliable; empty otherwise (the CLI treats "" as none).
+RESULT_VALUE=$(echo "$INPUT" | jq -r '
+  if (.tool_response|type=="array") and (.tool_response|length==1)
+     and (.tool_response[0]|type=="object") and (.tool_response[0]|keys|length==1)
+  then (.tool_response[0]|to_entries|.[0].value) else empty end' 2>/dev/null || echo "")
+
+# The provenance grouping id; create one on the first query of the session so every query is grouped.
+ANALYSIS_ID=$(python3 -c "
+import sys
+sys.path.insert(0, '$PROJECT_DIR')
+try:
+    from helpers.analysis_context import current_analysis_id
+    print(current_analysis_id(create=True) or '')
+except Exception:
+    print('')
+" 2>/dev/null || echo "")
+
 # Log via the CLI wrapper (same log the validation agent reads)
 # --dialect and --connection are hardcoded to snowflake because this hook
 # ONLY fires for mcp__snowflake__run_snowflake_query
@@ -58,6 +76,8 @@ python3 "$PROJECT_DIR/scripts/log_query.py" \
   --connection snowflake_mcp \
   --tables $TABLES \
   --result "$RESULT_SUMMARY" \
+  --result-value "$RESULT_VALUE" \
+  --analysis-id "$ANALYSIS_ID" \
   --rows "$ROW_COUNT" \
   2>/dev/null || true  # Never block Claude on log failure
 

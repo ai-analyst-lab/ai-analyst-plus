@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import json
 import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -95,6 +96,7 @@ def append_entry(
     status: str = "success",
     error: str | None = None,
     query_id: str | None = None,
+    analysis_id: str | None = None,
 ) -> dict:
     """Append a query log entry to the JSONL file.
 
@@ -126,14 +128,16 @@ def append_entry(
     log_path = _log_path(dataset_name, date)
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Auto-generate query_id from agent prefix + sequence
+    # Auto-generate a collision-free query_id (agent prefix + random suffix). The old ms%100000
+    # scheme wrapped every 100s and collided under the concurrent sub-agent runs the /eval driver
+    # spawns; a uuid suffix is unique regardless of concurrency. Grouping is by analysis_id, not this.
     if query_id is None:
         prefix = agent.replace("-", "_")[:8]
-        ts = int(time.time() * 1000) % 100000
-        query_id = f"{prefix}_{ts:05d}"
+        query_id = f"{prefix}_{uuid.uuid4().hex[:8]}"
 
     entry = {
         "query_id": query_id,
+        "analysis_id": analysis_id,
         "timestamp": datetime.now().isoformat(),
         "agent": agent,
         "pipeline_step": pipeline_step,
