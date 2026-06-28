@@ -267,6 +267,7 @@ def test_next_medium_ports_are_in_docs_and_report():
         assert name not in report["missing_codex"]
 
 EXPERT_TOOL_PORT_CONTRACTS = {
+    "question-router": ['L1', 'L5', 'North Star', 'narrated'],
     "setup": ['4-phase', '.knowledge/setup-state.yaml', 'reset everything'],
 }
 
