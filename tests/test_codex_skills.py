@@ -210,6 +210,7 @@ def test_migration_report_reflects_easy_medium_batch():
     for name in RECENT_EASY_MEDIUM_PORTS:
         assert name not in report["missing_codex"]
 
+
 NEXT_MEDIUM_PORTS = {
     "analysis-design",
     "analysis-design-spec",
@@ -220,6 +221,7 @@ NEXT_MEDIUM_PORTS = {
     "explore",
     "stress-test",
     "tracking-gaps",
+    "triangulation",
 }
 
 
@@ -240,6 +242,7 @@ def test_next_medium_ports_preserve_key_contracts():
         "explore": ["Question Router", "working/explore_notes"],
         "stress-test": ["Stress Test Scorecard", "Kill criteria"],
         "tracking-gaps": ["Tracking Gap Report", "Instrumentation Requests"],
+        "triangulation": ["Validation Report", "segment-first"],
     }
     for name, phrases in expected_phrases.items():
         text = (SKILLS_DIR / name / "SKILL.md").read_text()
