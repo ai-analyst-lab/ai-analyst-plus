@@ -177,39 +177,14 @@ Write:
 ### Step 6 — Append the audit log
 
 Append one JSONL row to `.knowledge/claude-review/log.jsonl`. Create the directory if
-needed. Count verdicts from `verdict.json`, not from prose:
+needed. Count verdicts from `verdict.json`, not from prose, using the deterministic helper:
 
 ```bash
-python3 - "<run_dir>" <<'PY'
-import json, sys
-from datetime import datetime, timezone
-from pathlib import Path
-
-run_dir = Path(sys.argv[1])
-payload = json.loads((run_dir / "verdict.json").read_text())
-findings = payload.get("findings", [])
-counts = {"AGREE": 0, "PARTIAL": 0, "DISAGREE": 0, "UNKNOWN": 0}
-for finding in findings:
-    verdict = str(finding.get("verdict", "")).strip().upper()
-    counts[verdict if verdict in counts else "UNKNOWN"] += 1
-entry = {
-    "ts": datetime.now(timezone.utc).isoformat(),
-    "question": payload.get("question", "(unknown)"),
-    "reviewer": payload.get("reviewer", "claude"),
-    "n_findings": len(findings),
-    "agree": counts["AGREE"],
-    "partial": counts["PARTIAL"],
-    "disagree": counts["DISAGREE"],
-    "unknown": counts["UNKNOWN"],
-    "dir": str(run_dir),
-}
-log_dir = Path(".knowledge/claude-review")
-log_dir.mkdir(parents=True, exist_ok=True)
-with (log_dir / "log.jsonl").open("a") as f:
-    f.write(json.dumps(entry, sort_keys=True) + "\n")
-print(json.dumps(entry, indent=2, sort_keys=True))
-PY
+python3 helpers/review_logging.py <run_dir> claude-review
 ```
+
+The helper validates `verdict.json`, counts `AGREE`, `PARTIAL`, `DISAGREE`, and `UNKNOWN`,
+and appends a stable JSONL audit entry.
 
 ### Step 7 — Report to the user
 
