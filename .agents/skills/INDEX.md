@@ -25,6 +25,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `independent-review` | `.agents/skills/independent-review/SKILL.md` | The user wants a provider-neutral blind second-pass validation, second opinion, cross-check, or independent re-derivation. | `working/independent_review/`, `.knowledge/independent-review/log.jsonl` |
 | `claude-review` | `.agents/skills/claude-review/SKILL.md` | Codex produced an analysis and the user wants Claude to independently validate it from a blind brief. | `working/claude_review/`, `.knowledge/claude-review/log.jsonl` |
 | `skill-parity-review` | `.agents/skills/skill-parity-review/SKILL.md` | The user wants to compare a Codex skill with its corresponding Claude skill, audit migration parity, port a Claude skill to Codex, or bring a Codex skill up to parity. | `working/skill_parity_review/` |
+| `experiment-brief` | `.agents/skills/experiment-brief/SKILL.md` | User has an experiment idea and needs hypothesis, primary metric, guardrails, success criteria, and feasibility. | Experiment Brief |
 | `tracking-gaps` | `.agents/skills/tracking-gaps/SKILL.md` | Data needed for an analysis is missing, partial, or requires instrumentation. | Tracking Gap Report, instrumentation requests |
 | `data-map` | `.agents/skills/data-map/SKILL.md` | User wants a first-contact dataset-wide overview, relationship map, and health summary. | Dataset map report, query logs |
 | `explore` | `.agents/skills/explore/SKILL.md` | User wants quick interactive data exploration, table previews, or column distributions. | `working/explore_notes_*.md` |
@@ -73,6 +74,7 @@ Use $google-doc-export to create a formatted Google Doc with local backup.
 Use $google-slides-export to create a Google Slides deck when tools are available.
 Use $notion-export to publish analysis to Notion when tools are available.
 Use $skill-parity-review to port another Claude skill to Codex.
+Use $experiment-brief before designing or launching an A/B test.
 Use $tracking-gaps when required data is unavailable or incomplete.
 Use $data-map to map a new dataset before analysis.
 Use $explore to poke around data before formal analysis.
