@@ -305,6 +305,7 @@ def test_expert_tool_ports_are_in_docs_and_report():
         assert name not in report["missing_codex"]
 
 REMAINING_PORT_CONTRACTS = {
+    "distribution-profiler": ['Distribution Profile', 'skewness', 'A/B'],
     "deck-rescue": ['working/deck_rescue', 'before_after', 'speaker notes'],
     "deck-critique": ['Data Story Checklist', 'SO-WHAT', 'ASK'],
     "connect-snowflake": ['Snowflake', 'ConnectionManager', '.knowledge/datasets'],

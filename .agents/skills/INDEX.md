@@ -46,6 +46,7 @@ replace, legacy Claude Code skills under `.claude/skills/`.
 | `connect-snowflake` | `.agents/skills/connect-snowflake/SKILL.md` | The user wants to configure, validate, or troubleshoot a Snowflake analysis connection. | `.knowledge/datasets/{dataset}/`, `.knowledge/active.yaml` |
 | `deck-critique` | `.agents/skills/deck-critique/SKILL.md` | A deck or slide draft needs scored review against stakeholder storytelling standards. | `working/deck_critique_*.md`, slide score table |
 | `deck-rescue` | `.agents/skills/deck-rescue/SKILL.md` | A weak or overloaded deck needs a focused stakeholder-ready narrative rebuild. | `working/deck_rescue_*.marp.md`, `working/before_after_*.md` |
+| `distribution-profiler` | `.agents/skills/distribution-profiler/SKILL.md` | A numeric metric distribution or statistical-test assumption needs profiling. | Distribution Profile report, diagnostic chart |
 | `log-correction` | `.agents/skills/log-correction/SKILL.md` | User explicitly wants to log/save/record a correction or mistake. | `.knowledge/corrections/log.yaml`, `.knowledge/corrections/index.yaml` |
 | `feedback-capture` | `.agents/skills/feedback-capture/SKILL.md` | User corrects an answer, teaches a reusable preference, or asks to remember feedback. | `.knowledge/corrections/`, `.knowledge/learnings/index.md` |
 | `business` | `.agents/skills/business/SKILL.md` | User wants documented business context: glossary, products, metrics, objectives, teams, or term lookup. | `.knowledge/organizations/` |
@@ -111,6 +112,7 @@ Use $chart-to-drive to upload chart assets for Google insertion.
 Use $connect-snowflake to configure a Snowflake dataset connection.
 Use $deck-critique to score and improve a deck.
 Use $deck-rescue to rebuild a weak deck into a focused story.
+Use $distribution-profiler to profile a metric distribution and choose tests.
 Use $log-correction to record a mistake and fix.
 Use $feedback-capture when the user gives a correction or reusable preference.
 Use $business to browse organization context.
