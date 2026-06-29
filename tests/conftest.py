@@ -25,6 +25,8 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "slow: marks tests as slow (deselect with -m 'not slow')")
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
     config.addinivalue_line("markers", "statistical: marks tests as statistical tests")
+    config.addinivalue_line("markers", "e2e: marks local end-to-end smoke tests")
+    config.addinivalue_line("markers", "external: marks tests requiring external services or credentials")
 
 
 # ---------------------------------------------------------------------------

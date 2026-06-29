@@ -35,6 +35,8 @@ markers = [
     "slow: marks tests as slow (deselect with -m 'not slow')",
     "integration: marks tests as integration tests",
     "statistical: marks tests as statistical tests",
+    "e2e: marks local end-to-end smoke tests",
+    "external: marks tests requiring external services or credentials",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,24 +1,26 @@
 # AI Analyst Plus
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Claude Code Required](https://img.shields.io/badge/requires-Claude%20Code-blueviolet.svg)](https://claude.ai/code)
+[![Claude Code](https://img.shields.io/badge/supports-Claude%20Code-blueviolet.svg)](https://claude.ai/code)
+[![Codex](https://img.shields.io/badge/supports-Codex-111827.svg)](docs/codex-guide.md)
 
-An AI-powered product analyst that lives inside Claude Code. Ask business questions in plain English, get validated analyses, branded charts, and stakeholder-ready slide decks — in minutes, not days.
+An AI-powered product analyst for Claude Code and Codex-assisted analytics workflows. Ask business questions in plain English, get validated analyses, branded charts, and stakeholder-ready slide decks — in minutes, not days.
 
-**18** agents | **55** skills | **40** helper modules | DAG-based parallel execution | PDF + HTML + Google Docs export
+**18** agents | **55+** skills | **40** helper modules | DAG-based parallel execution | PDF + HTML + Google Docs export
 
 ---
 
 ## What This Is
 
-AI Analyst Plus turns Claude Code into a product analytics system. It combines:
+AI Analyst Plus turns AI coding agents into a product analytics system. It combines:
 
-- **Skills** (`.claude/skills/`) — standards Claude follows automatically (chart styling, data validation, question framing, stakeholder communication)
+- **Claude skills** (`.claude/skills/`) — standards Claude follows automatically (chart styling, data validation, question framing, stakeholder communication)
+- **Codex skills** (`.agents/skills/`) — Codex-native workflows such as `$independent-review`, `$claude-review`, `$skill-parity-review`, and `$metric-spec`
 - **Agents** (`agents/`) — multi-step analytical workflows orchestrated by a DAG engine (question framing → data exploration → analysis → storytelling → deck creation)
 - **Helpers** (`helpers/`) — Python modules for charting, SQL validation, data connectivity, statistical tests, and more
 - **Knowledge** (`.knowledge/`) — persistent memory for dataset context, corrections, proven SQL patterns, and business glossary
 
-You interact by talking to Claude. Ask a question, invoke a slash command, or let Claude figure out which skills and agents to apply.
+You interact by talking to Claude or Codex. Ask a question, invoke a slash command or skill, or let the agent figure out which skills and agents to apply.
 
 ---
 
@@ -32,35 +34,46 @@ cd ai-analyst-plus
 pip install -e ".[dev]"
 ```
 
-**2. Connect your data** (optional)
-
-In Claude Code, run `/connect-data` to wire up a warehouse (DuckDB, Postgres,
-BigQuery, Snowflake) or a CSV directory. Curated public datasets with guides live
-in `data/examples/`.
-
-**3. Start Claude Code**
+### Claude Code path
 
 ```bash
 claude
 ```
 
-**4. Ask a question**
+Then use legacy slash-command workflows, for example:
 
-```
-What's our conversion rate by device?
-```
-
-Or run the full pipeline:
-
-```
+```text
+/connect-data
 /run-pipeline question="Why is conversion dropping on mobile?"
+/export brief
 ```
+
+### Codex path
+
+Start Codex in this repository and use natural language or `$skill-name` workflows:
+
+```text
+Use $connect-data to add my CSV directory.
+Use $datasets to list connected data sources.
+Use $data-inspect to inspect the active schema.
+Use $run-pipeline question="Why is conversion dropping on mobile?".
+Use $export brief to create a stakeholder decision brief.
+```
+
+Codex skills are not underscore slash commands. See `docs/codex-guide.md` and
+`.agents/skills/INDEX.md` for the current Codex-native workflow list.
+
+### Connect your data
+
+Claude users can run `/connect-data`; Codex users can use `$connect-data`. Supported sources
+include CSV, DuckDB/MotherDuck, PostgreSQL, BigQuery, and Snowflake. Curated public datasets
+with guides live in `data/examples/`.
 
 ---
 
 ## Don't Know What to Do? Just Ask.
 
-Claude knows the entire system — every agent, skill, command, and dataset. If you're stuck:
+Claude/Codex can inspect the system — every agent, skill, command, and dataset. If you're stuck:
 
 ```
 What can I do with this data?
@@ -70,7 +83,7 @@ Which agents handle root cause analysis?
 Re-run just the chart maker and deck creator.
 ```
 
-You don't need to memorize anything in this README. Think of it as a reference — Claude is the guide.
+You don't need to memorize anything in this README. Think of it as a reference — the agent is the guide.
 
 ---
 
@@ -120,7 +133,8 @@ Charts follow Storytelling with Data methodology: warm off-white background, dec
 
 ## How It Works: The Pipeline
 
-When you run `/run-pipeline`, Claude orchestrates 18 agents across 4 phases:
+When you run `/run-pipeline` in Claude Code or `$run-pipeline` in Codex, the agent orchestrates
+the registry-backed pipeline across 4 phases:
 
 ```
 1. FRAME              2. ANALYZE                          3. STORY                 4. DECK
@@ -158,8 +172,9 @@ Five execution plans let you run just the part you need:
 
 If the pipeline gets interrupted, resume where you left off:
 
-```
-/resume-pipeline
+```text
+/resume-pipeline      # Claude Code
+$resume-pipeline      # Codex
 ```
 
 ---
@@ -198,6 +213,34 @@ If the pipeline gets interrupted, resume where you left off:
 
 Or just ask in plain English. "Show me conversion by device" works as well as any command.
 
+## Codex Skill Highlights
+
+Codex-native skills live in `.agents/skills/`. Current high-value workflows include:
+
+| Codex skill | Purpose |
+|---|---|
+| `$connect-data`, `$datasets`, `$switch-dataset`, `$data-inspect` | Dataset setup and navigation |
+| `$data-quality-check`, `$metric-spec`, `$reliability`, `$compare`, `$experiment` | Analysis quality, metrics, experiments, stability checks |
+| `$run-pipeline`, `$resume-pipeline`, `$export` | End-to-end workflow, recovery, deliverables |
+| `$presentation-themes`, `$google-doc-export`, `$google-slides-export`, `$notion-export` | Presentation and external export standards |
+| `$independent-review`, `$claude-review` | Blind validation and second opinions |
+| `$skill-parity-review` | Port or audit additional skills |
+
+See `docs/internal/skill-migration-matrix.md` for migration status and known limitations.
+
+## Test Commands
+
+```bash
+pytest
+pytest -m "not slow"
+pytest tests/test_codex_skills.py
+pytest tests/e2e -m "not external"
+```
+
+External integrations such as Google Docs, Google Slides, Notion, live warehouses, and Marp
+PDF/HTML export require separate tool/auth setup and should be tested with explicit external
+markers or manual smoke tests.
+
 ---
 
 ## Your Data
@@ -231,7 +274,8 @@ ai-analyst-plus/
 ├── agents/                      # 18 agent prompt templates (markdown)
 │   ├── registry.yaml            # DAG dependencies and execution order
 │   └── CONTRACT_TEMPLATE.md     # Template for writing new agents
-├── .claude/skills/              # 55 skill definitions
+├── .claude/skills/              # Legacy Claude skill definitions
+├── .agents/skills/              # Codex-native skill definitions
 ├── helpers/                     # 40 Python modules
 │   ├── chart_helpers.py         # SWD charting (swd_style, highlight_bar, etc.)
 │   ├── data_helpers.py          # Data source abstraction
@@ -248,7 +292,7 @@ ai-analyst-plus/
 
 ### Skills vs Agents
 
-**Skills** are standards Claude follows automatically. When you make a chart, the Visualization Patterns skill activates. When you start an analysis, Data Quality Check runs. You never invoke them — they apply when their trigger condition matches. Multiple skills can fire at once.
+**Skills** are reusable standards and workflows. Claude skills in `.claude/skills/` support legacy Claude Code slash commands such as `/codex-review`; Codex skills in `.agents/skills/` support Codex-native invocation such as `$independent-review`, `$claude-review`, `$skill-parity-review`, `$metric-spec`, or selection from `/skills`; do not invoke them as underscore slash commands. When you make a chart, the Visualization Patterns skill activates. When you start an analysis, Data Quality Check runs. Multiple skills can fire at once.
 
 **Agents** are multi-step workflows for specific tasks. They're markdown prompt templates with `{{VARIABLES}}` that get substituted at runtime. The pipeline orchestrates them in dependency order using a DAG engine.
 
@@ -267,7 +311,8 @@ ai-analyst-plus/
 | Want to... | Do this |
 |-----------|---------|
 | Change how Claude thinks | Edit `CLAUDE.md` (persona, rules, workflow) |
-| Add a new skill | Create `.claude/skills/my-skill/skill.md` |
+| Add a Claude skill | Create `.claude/skills/my-skill/skill.md` |
+| Add a Codex skill | Create `.agents/skills/my-skill/SKILL.md` |
 | Add a new agent | Create `agents/my-agent.md` using `agents/CONTRACT_TEMPLATE.md` |
 | Change the slide theme | Create a YAML theme in `themes/brands/` |
 | Modify the pipeline | Edit `.claude/skills/run-pipeline/skill.md` |

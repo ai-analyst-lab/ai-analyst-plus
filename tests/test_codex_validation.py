@@ -1,4 +1,4 @@
-"""Tests for helpers.codex_validation — preflight detection + audit logging."""
+"""Tests for the legacy Claude /codex-review helper."""
 
 import json
 import pytest
@@ -22,7 +22,7 @@ def tmp_plugin_cache(tmp_path, monkeypatch):
 
 @pytest.fixture
 def tmp_log_dir(tmp_path, monkeypatch):
-    """Redirect the audit log to a temp dir."""
+    """Redirect the legacy Claude /codex-review audit log to a temp dir."""
     log_dir = tmp_path / "codex-review"
     monkeypatch.setattr(cv, "_LOG_DIR", log_dir)
     return log_dir
