@@ -1,0 +1,15 @@
+flowchart TD
+    A[analysis_results.json] --> SRM{SRM / data<br/>quality ok?}
+    SRM -->|no| INV[INVALID<br/>refuse to proceed]:::bad
+    SRM -->|yes| R{result?}
+    R -->|positive| G{guardrails<br/>clean?}
+    G -->|yes| SHIP[SHIP]:::good
+    G -->|degraded| INVs[INVESTIGATE<br/>Mixed Results Framework]:::warn
+    R -->|null| P{powered?}
+    P -->|yes| AB[ABORT<br/>no evidence of benefit]:::bad
+    P -->|no| LE[LEARN<br/>extend or re-design]:::warn
+    R -->|negative| AB2[ABORT]:::bad
+
+    classDef good fill:#e6f4ea,stroke:#34a853
+    classDef warn fill:#fef7e0,stroke:#fbbc04
+    classDef bad fill:#fce8e6,stroke:#ea4335

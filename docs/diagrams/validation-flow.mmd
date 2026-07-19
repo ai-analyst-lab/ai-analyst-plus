@@ -1,0 +1,26 @@
+flowchart TD
+    AA[analysis agents]:::a --> T1{{"Tier 1 always-on<br/>1a boundary -> HALT<br/>1b soft -> FLAG"}}:::halt
+    T1 --> F[findings + query log]:::a
+
+    F --> CV["cross-verification (6.5)<br/>boundary / parts-to-whole /<br/>ratio-recompute / algebraic-identity"]:::v
+    CV --> SCV["score_cross_verification()<br/>0-15"]:::v
+    SCV --> CP2{{"Checkpoint 2<br/>HALT if score 0-7"}}:::halt
+
+    CP2 --> VAL["validation agent (step 7)"]:::v
+    subgraph L["4-layer stack - halt on BLOCKER"]
+        L1["Layer 1 structural<br/>structural_validator.py"]:::l
+        L2["Layer 2 logical<br/>logical_validator.py"]:::l
+        L3["Layer 3 business rules<br/>business_rules.py"]:::l
+        L4["Layer 4 Simpson's<br/>simpsons_paradox.py"]:::l
+    end
+    VAL --> L1 --> L2 --> L3 --> L4
+    SCV -->|factor #8| SC
+    L4 --> SC["score_confidence()<br/>9 factors -> 0-100 + A-F"]:::v
+    SC --> BADGE["confidence badge"]:::out
+    BADGE --> DS["Storytelling / Deck Creator<br/>exec summary + per-finding data stamp"]:::out
+
+    classDef a fill:#e8f0fe,stroke:#4285f4
+    classDef v fill:#fef7e0,stroke:#fbbc04
+    classDef l fill:#e6f4ea,stroke:#34a853
+    classDef halt fill:#fce8e6,stroke:#ea4335
+    classDef out fill:#f3e8fd,stroke:#a142f4

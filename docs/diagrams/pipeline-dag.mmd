@@ -1,0 +1,45 @@
+flowchart TD
+    QF[question-framing]:::t0 --> HY[hypothesis]:::t1
+    DE[data-explorer]:::t0 --> DA[descriptive-analytics]:::t2
+    DA --> RCI[root-cause-investigator]:::t3
+
+    RCI --> CV[cross-verification]:::t4
+    DA -.->|depends_on_any| CV
+    OT[overtime-trend]:::t2 -.->|depends_on_any| CV
+    CO[cohort-analysis]:::t2 -.->|depends_on_any| CV
+
+    CV --> CP2{{"CP2: score >= 8?<br/>HALT if 0-7"}}:::cp
+    CP2 --> VAL[validation]:::t5
+    VAL --> CP21{{"CP2.1: validation<br/>depth menu"}}:::cp
+    CP21 --> OS[opportunity-sizer]:::t6
+
+    OS --> SA[story-architect]:::t7
+    CV --> SA
+    SA --> NCR[narrative-coherence-reviewer]:::t8
+    NCR --> CP25{{"CP2.5: storyboard"}}:::cp
+    CP25 --> CM[chart-maker]:::t9
+    CM --> VDC[visual-design-critic]:::t9
+    VDC --> CP3{{"CP3: charts<br/>fix loop / HALT"}}:::cp
+    CP3 --> ST[storytelling]:::t10
+    ST --> DC[deck-creator]:::t11
+    DC --> VDCS[visual-design-critic-slides]:::t11
+    VDCS --> CP4{{"CP4: deck<br/>Marp lint gate"}}:::cp
+    CP4 --> CTL[close-the-loop]:::t12
+    CTL --> CD[comms-drafter<br/>non-critical]:::t12
+
+    HY -.->|HYPOTHESIS_DOC context| DA
+
+    classDef t0 fill:#e8f0fe,stroke:#4285f4
+    classDef t1 fill:#e8f0fe,stroke:#4285f4
+    classDef t2 fill:#e6f4ea,stroke:#34a853
+    classDef t3 fill:#e6f4ea,stroke:#34a853
+    classDef t4 fill:#fef7e0,stroke:#fbbc04
+    classDef t5 fill:#fef7e0,stroke:#fbbc04
+    classDef t6 fill:#fef7e0,stroke:#fbbc04
+    classDef t7 fill:#fce8e6,stroke:#ea4335
+    classDef t8 fill:#fce8e6,stroke:#ea4335
+    classDef t9 fill:#fce8e6,stroke:#ea4335
+    classDef t10 fill:#f3e8fd,stroke:#a142f4
+    classDef t11 fill:#f3e8fd,stroke:#a142f4
+    classDef t12 fill:#f3e8fd,stroke:#a142f4
+    classDef cp fill:#fff,stroke:#5f6368,stroke-dasharray:3 3
