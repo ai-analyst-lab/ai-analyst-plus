@@ -35,11 +35,11 @@ The user will type one of:
 
 | Topic | Script | What it produces |
 |-------|--------|------------------|
-| `signal-vs-noise` | `topics/signal_vs_noise.py` | Two bell-curve charts (tight vs. wide SD, same means) + a side-by-side combined image. Illustrates that a 1.6-pt mean gap is a clear signal when SD is small and disappears in noise when SD is large. |
+| `signal-vs-noise` | `shared/teach/topics/signal_vs_noise.py` via `topics/signal_vs_noise.py` wrapper | Two bell-curve charts (tight vs. wide SD, same means) + a side-by-side combined image. Illustrates that a 1.6-pt mean gap is a clear signal when SD is small and disappears in noise when SD is large. |
 
 ## Execution
 
-1. Resolve the topic name to its script under `.claude/skills/teach/topics/`.
+1. Resolve the topic name to its shared script under `shared/teach/topics/`, using `.claude/skills/teach/topics/` wrappers only for backwards compatibility.
    - Accept hyphenated, underscored, or spaced forms (`signal-vs-noise`,
      `signal_vs_noise`, `signal vs noise`).
 2. Run the script with `python3`. Each script is self-contained and writes to
@@ -53,7 +53,7 @@ The user will type one of:
 ## Adding a topic
 
 To add a new topic:
-1. Create `topics/<topic_name>.py` with a `main()` that renders to
+1. Create reusable topic implementations under `shared/teach/topics/` with a `main()` that renders to
    `outputs/charts/teach/<topic_name>/`.
 2. Use `swd_style()` and `action_title()` from `helpers/chart_helpers.py` so
    visuals match the rest of the repo.

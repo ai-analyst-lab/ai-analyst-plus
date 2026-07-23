@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Deterministic preflight + audit logging for the /codex-review skill.
+"""Legacy Claude preflight + audit logging for the /codex-review skill.
 
-The /codex-review skill has Codex independently re-derive an analysis and
+This helper remains for the legacy Claude Code /codex-review workflow. The
+/codex-review skill has Codex independently re-derive an analysis and
 compares it to Claude's original. This helper keeps the two deterministic,
 non-judgement parts out of the skill body:
 
@@ -29,7 +30,8 @@ validating with Claude (which would be circular).
      "findings": [{"name": "...", "verdict": "AGREE"}, ...]}
 counts AGREE/DISAGREE/PARTIAL deterministically, and appends one line to
 .knowledge/codex-review/log.jsonl. Counting lives here, never estimated by
-the model.
+the model. Codex-native reviews use the provider-neutral independent-review
+skill and .knowledge/independent-review/ instead.
 """
 import json
 import shutil

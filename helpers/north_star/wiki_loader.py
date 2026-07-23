@@ -3,7 +3,7 @@
 Thin wrapper around helpers/context_loader.load_tiered() that adds:
   - Slug resolution (e.g., "leading-vs-lagging" → concepts/leading-vs-lagging.md)
   - Category listing (list all anti-pattern slugs, all case slugs, etc.)
-  - Default wiki root (.claude/skills/north-star/wiki/)
+  - Default wiki root (shared/north-star/wiki/)
   - Provenance envelope extraction from loaded YAML
   - Per-category default LoadTier (concepts=FULL, cases=SUMMARY, etc.)
 
@@ -41,8 +41,9 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-# Default wiki root — overrideable for tests
-_DEFAULT_WIKI_ROOT = Path(__file__).resolve().parents[2] / ".claude" / "skills" / "north-star" / "wiki"
+# Default wiki root — overrideable for tests. The curated corpus is shared
+# across Claude and Codex skills; the legacy Claude path is kept as a symlink.
+_DEFAULT_WIKI_ROOT = Path(__file__).resolve().parents[2] / "shared" / "north-star" / "wiki"
 
 
 # Categories the wiki organizes content into. Maps to subdirectory names.

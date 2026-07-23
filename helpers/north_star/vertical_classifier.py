@@ -146,12 +146,12 @@ def _load_calibration_cached(path_str: str, mtime_ns: int) -> dict:
 
 def _default_verticals_root() -> Path:
     """Bundled-default verticals dir. Mirrors wiki_loader._DEFAULT_WIKI_ROOT/verticals."""
-    return Path(__file__).resolve().parents[2] / ".claude" / "skills" / "north-star" / "wiki" / "verticals"
+    return Path(__file__).resolve().parents[2] / "shared" / "north-star" / "wiki" / "verticals"
 
 
 def _default_wiki_root() -> Path:
     """Bundled-default wiki root. Mirrors wiki_loader._DEFAULT_WIKI_ROOT."""
-    return Path(__file__).resolve().parents[2] / ".claude" / "skills" / "north-star" / "wiki"
+    return Path(__file__).resolve().parents[2] / "shared" / "north-star" / "wiki"
 
 
 def _load_verticals_index(wiki_root_str: Optional[str] = None) -> dict:

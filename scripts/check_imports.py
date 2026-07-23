@@ -4,7 +4,8 @@
 Layer 0: stdlib + yaml only (no project imports)
 Layer 1: file_helpers
 Layer 2: entity_resolver, business_context, miss_rate_logger,
-         archaeology_helpers, context_loader, schema_migration, pipeline_state
+         archaeology_helpers, context_loader, schema_migration, pipeline_state,
+         pipeline_runtime
 Layer 3: chart_helpers, chart_palette, theme_loader, data_helpers,
          sql_helpers, error_helpers, stats_helpers, sql_dialect,
          connection_manager, schema_profiler
@@ -28,7 +29,7 @@ LAYER_MAP = {
     # Layer 2
     "entity_resolver": 2, "business_context": 2, "miss_rate_logger": 2,
     "archaeology_helpers": 2, "context_loader": 2, "schema_migration": 2,
-    "pipeline_state": 2,
+    "pipeline_state": 2, "pipeline_runtime": 2,
     # Layer 3
     "chart_helpers": 3, "chart_palette": 3, "theme_loader": 3,
     "data_helpers": 3, "sql_helpers": 3,

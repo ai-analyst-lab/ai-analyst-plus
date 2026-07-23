@@ -123,7 +123,7 @@ A schema validation failure escalates to the coordinator per `AGENT_REGISTRY.yam
 Per `WIKI_SCHEMA.md` §"Schema versioning policy":
 
 - **Additive change** (new optional field, new enum value that doesn't remove old ones): keep `schema_version: 1`; note under `[unreleased]` in `wiki/CHANGELOG.md`.
-- **Breaking change** (rename, removal, enum tightening): bump `schema_version` on the affected file. Parallel-ship old + new for one minor release. Update `ai-analyst-plus/.claude/skills/north-star/wiki_compat.yaml`.
+- **Breaking change** (rename, removal, enum tightening): bump `schema_version` on the affected file. Parallel-ship old + new for one minor release. Update the shared wiki compatibility notes under `ai-analyst-plus/shared/north-star/wiki/`.
 - The `runtime-tracer` agent's `schema_compat` assertion catches mismatches in CI before merge.
 
 ---
